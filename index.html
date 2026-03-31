@@ -109,6 +109,14 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink-60)
 .da-icon{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:var(--radius);border:1.5px solid var(--ink-05);background:var(--white);cursor:pointer;font-size:1.1rem;transition:.25s var(--ease);color:var(--ink-40);flex-shrink:0}
 .da-icon:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-xl);transform:translateY(-1px);box-shadow:var(--shadow-1)}
 .fi-note{font-size:.7rem;cursor:help;opacity:.7}
+.proj-card-pick{display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;border-radius:var(--radius);border:1.5px solid var(--ink-05);background:var(--white);cursor:pointer;transition:.25s var(--ease);text-align:left}
+.proj-card-pick:hover{border-color:var(--blue);background:var(--blue-xl);transform:translateY(-1px)}
+.proj-card-pick.selected{border-color:var(--blue);background:var(--blue-xl);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+.proj-card-pick .pcp-icon{font-size:1.3rem;flex-shrink:0}
+.proj-card-pick .pcp-name{font-weight:700;color:var(--ink);font-size:.88rem}
+.proj-card-pick .pcp-meta{font-size:.72rem;color:var(--ink-40)}
+.proj-card-pick .pcp-count{margin-left:auto;font-size:.75rem;font-weight:600;color:var(--blue);background:var(--blue-l);padding:.2rem .5rem;border-radius:50px;flex-shrink:0}
+.form-success-msg{display:flex;align-items:center;gap:.5rem;padding:.65rem 1rem;border-radius:var(--radius);background:var(--green-l);border:1px solid #bbf7d0;color:var(--green);font-weight:600;font-size:.85rem;margin-bottom:1rem;animation:fadeIn .3s var(--ease)}
 @media print{.header,.project-bar,.phases,.drop-zone,.processing,.file-list,.dash-actions,.search-bar,.toast,.modal-overlay,.nav-btn,.pb-actions{display:none!important}.main{padding:0}.dashboard{box-shadow:none;border:none}.stat-card{break-inside:avoid}}
 .processing{display:none;text-align:center;padding:3rem 2rem}
 .processing.visible{display:block;animation:fadeIn .4s var(--ease)}
@@ -250,10 +258,22 @@ tbody tr:nth-child(even):hover{background:var(--blue-xl)}
 <div class="table-section"><div class="tab-bar"><button class="tab-btn active" onclick="switchTab('fonc')">🏛️ Fonctionnaires <span class="tab-count" id="tabCountF">0</span></button><button class="tab-btn" onclick="switchTab('cont')">📋 Contractuels <span class="tab-count" id="tabCountC">0</span></button></div><div class="ts-header"><div class="ts-title" id="tsTitle">🏛️ Fonctionnaires</div><div class="ts-controls"><span style="font-size:.8rem;color:var(--ink-40)" id="resultCount"></span></div></div><div class="table-wrap" id="tableWrap"></div></div>
 </div></div></div>
 <!-- MODAL FORM -->
-<div class="modal-overlay" id="formModal"><div class="modal"><button class="modal-close" onclick="closeFormModal()">✕</button><h2 style="font-family:'Fraunces',serif;font-weight:900;font-size:1.4rem;color:var(--ink);margin-bottom:.25rem">Saisie manuelle</h2><p style="color:var(--ink-40);font-size:.85rem;margin-bottom:1.5rem">Ajoutez un agent directement aux données compilées.</p>
+<div class="modal-overlay" id="formModal"><div class="modal"><button class="modal-close" onclick="closeFormModal()">✕</button><h2 style="font-family:'Fraunces',serif;font-weight:900;font-size:1.4rem;color:var(--ink);margin-bottom:.25rem">Saisie manuelle</h2><p style="color:var(--ink-40);font-size:.85rem;margin-bottom:1rem" id="formModalSub">Choisissez un projet puis ajoutez un agent.</p>
+<!-- ÉTAPE 1 : Choix du projet -->
+<div id="formStep1">
+<div class="form-section"><div class="form-section-title">📁 Projet cible</div>
+<div class="form-type-selector" id="projectSelectorCards"></div>
+<div style="text-align:center;margin:1rem 0"><span style="font-size:.78rem;color:var(--ink-40);font-weight:600;text-transform:uppercase;letter-spacing:.08em">— ou créer un nouveau —</span></div>
+<div class="form-grid"><div class="form-field"><label>Nom du projet <span class="req">*</span></label><input type="text" id="formNewProjectName" placeholder="Ex: Elections CDG 09"></div><div class="form-field"><label>Année</label><select id="formNewProjectYear"><option value="2025">2025</option><option value="2026" selected>2026</option><option value="2027">2027</option><option value="2028">2028</option></select></div></div>
+<div class="form-actions"><button class="da-btn da-primary" onclick="formSelectNewProject()">Créer et continuer →</button></div>
+</div></div>
+<!-- ÉTAPE 2 : Choix type + formulaire -->
+<div id="formStep2" style="display:none">
+<div style="display:flex;align-items:center;gap:.5rem;margin-bottom:1rem;padding:.6rem .8rem;background:var(--blue-xl);border-radius:var(--radius);border:1px solid var(--blue-l)"><span style="font-size:1.1rem">📁</span><span style="font-weight:700;color:var(--ink);font-size:.88rem" id="formProjectLabel">—</span><button style="margin-left:auto;background:none;border:none;color:var(--blue);font-weight:600;font-size:.78rem;cursor:pointer;font-family:'Outfit'" onclick="formBackToStep1()">Changer ↗</button></div>
 <div class="form-type-selector"><div class="form-type-card active" data-type="fonctionnaire" onclick="selectFormType('fonctionnaire')"><div class="ftc-icon">🏛️</div><h4>Fonctionnaire</h4><span>Titulaire ou Stagiaire</span></div><div class="form-type-card" data-type="contractuel" onclick="selectFormType('contractuel')"><div class="ftc-icon">📋</div><h4>Contractuel</h4><span>CDD ou CDI</span></div></div>
 <div id="modalFormFonc"><div class="form-section"><div class="form-section-title">📊 Scrutins</div><div class="toggle-row"><div class="toggle-item"><span>CST</span><button type="button" class="toggle-btn" id="mf_cst" onclick="toggleBtn(this)"></button></div><div class="toggle-item"><span>CAP A</span><button type="button" class="toggle-btn" id="mf_cap_a" onclick="toggleBtn(this)"></button></div><div class="toggle-item"><span>CAP B</span><button type="button" class="toggle-btn" id="mf_cap_b" onclick="toggleBtn(this)"></button></div><div class="toggle-item"><span>CAP C</span><button type="button" class="toggle-btn" id="mf_cap_c" onclick="toggleBtn(this)"></button></div></div></div><div class="form-section"><div class="form-section-title">👤 Identité</div><div class="form-grid"><div class="form-field"><label>Titre <span class="req">*</span></label><select id="mf_titre"><option value="">—</option><option>Monsieur</option><option>Madame</option></select></div><div class="form-field"><label>Nom de naissance <span class="req">*</span></label><input type="text" id="mf_nom" placeholder="Ex: DUPONT"></div><div class="form-field"><label>Nom d'usage</label><input type="text" id="mf_nom_usage" placeholder="Si différent"></div><div class="form-field"><label>Prénom <span class="req">*</span></label><input type="text" id="mf_prenom" placeholder="Ex: Marie"></div><div class="form-field"><label>Date de naissance <span class="req">*</span></label><input type="date" id="mf_dob"></div></div></div><div class="form-section"><div class="form-section-title">🏢 Situation administrative</div><div class="form-grid"><div class="form-field"><label>Collectivité <span class="req">*</span></label><input type="text" id="mf_collectivite" placeholder="Ex: Mairie de..."></div><div class="form-field"><label>Catégorie <span class="req">*</span></label><select id="mf_categorie"><option value="">—</option><option>A</option><option>B</option><option>C</option></select></div><div class="form-field"><label>Qualité <span class="req">*</span></label><select id="mf_qualite"><option value="">—</option><option>Titulaire</option><option>Stagiaire</option></select></div></div></div><div class="form-section"><div class="form-section-title">📍 Adresse</div><div class="form-grid"><div class="form-field full"><label>Adresse <span class="req">*</span></label><input type="text" id="mf_adresse" placeholder="Ex: 12 rue de la République"></div><div class="form-field"><label>Complément</label><input type="text" id="mf_complement" placeholder="Bât., étage..."></div><div class="form-field"><label>Commune <span class="req">*</span></label><input type="text" id="mf_commune" placeholder="Ex: Foix"></div><div class="form-field"><label>Code Postal <span class="req">*</span></label><input type="text" id="mf_cp" placeholder="09000" maxlength="5"></div></div></div><div class="form-actions"><button class="da-btn da-primary" onclick="addFonctionnaire()">✓ Ajouter</button><button class="da-btn da-secondary" onclick="resetModalForm('fonctionnaire')">↺ Réinitialiser</button></div></div>
 <div id="modalFormCont" style="display:none"><div class="form-section"><div class="form-section-title">📊 Scrutins</div><div class="toggle-row"><div class="toggle-item"><span>CST</span><button type="button" class="toggle-btn" id="mc_cst" onclick="toggleBtn(this)"></button></div><div class="toggle-item"><span>CCP</span><button type="button" class="toggle-btn" id="mc_ccp" onclick="toggleBtn(this)"></button></div></div></div><div class="form-section"><div class="form-section-title">👤 Identité</div><div class="form-grid"><div class="form-field"><label>Titre <span class="req">*</span></label><select id="mc_titre"><option value="">—</option><option>Monsieur</option><option>Madame</option></select></div><div class="form-field"><label>Nom de naissance <span class="req">*</span></label><input type="text" id="mc_nom" placeholder="Ex: MARTIN"></div><div class="form-field"><label>Nom d'usage</label><input type="text" id="mc_nom_usage" placeholder="Si différent"></div><div class="form-field"><label>Prénom <span class="req">*</span></label><input type="text" id="mc_prenom" placeholder="Ex: Paul"></div><div class="form-field"><label>Date de naissance <span class="req">*</span></label><input type="date" id="mc_dob"></div></div></div><div class="form-section"><div class="form-section-title">🏢 Situation contractuelle</div><div class="form-grid"><div class="form-field"><label>Collectivité <span class="req">*</span></label><input type="text" id="mc_collectivite" placeholder="Ex: Mairie de..."></div><div class="form-field"><label>Type de contrat <span class="req">*</span></label><select id="mc_type_contrat"><option value="">—</option><option>CDD</option><option>CDI</option></select></div><div class="form-field"><label>Qualification <span class="req">*</span></label><select id="mc_qualification"><option value="">—</option><option>Public</option><option>Privé</option></select></div><div class="form-field"><label>Date début</label><input type="date" id="mc_date_debut"></div><div class="form-field"><label>Date fin</label><input type="date" id="mc_date_fin"></div></div></div><div class="form-section"><div class="form-section-title">📍 Adresse</div><div class="form-grid"><div class="form-field full"><label>Adresse <span class="req">*</span></label><input type="text" id="mc_adresse" placeholder="Ex: 5 avenue du Général de Gaulle"></div><div class="form-field"><label>Complément</label><input type="text" id="mc_complement" placeholder="Bât., étage..."></div><div class="form-field"><label>Commune <span class="req">*</span></label><input type="text" id="mc_commune" placeholder="Ex: Pamiers"></div><div class="form-field"><label>Code Postal <span class="req">*</span></label><input type="text" id="mc_cp" placeholder="09100" maxlength="5"></div></div></div><div class="form-actions"><button class="da-btn da-primary" onclick="addContractuel()">✓ Ajouter</button><button class="da-btn da-secondary" onclick="resetModalForm('contractuel')">↺ Réinitialiser</button></div></div>
+</div><!-- /formStep2 -->
 </div></div>
 <div class="toast" id="toast"></div>
 <script>
@@ -523,17 +543,150 @@ function renderArchivesFullView(){const list=document.getElementById('archivesFu
 function resetCompiler(){undoBackup={fonctionnaires:[...fonctionnaires],contractuels:[...contractuels],fileResults:[...fileResults],currentTab,sortCol,sortDir};fonctionnaires=[];contractuels=[];fileResults=[];sortCol=-1;sortDir=1;currentTab='fonc';document.getElementById('dashboard').classList.remove('visible');document.getElementById('fileList').classList.remove('visible');document.getElementById('processing').classList.remove('visible');document.getElementById('btnAddMore').style.display='none';document.getElementById('btnCancelAdd').style.display='none';isAddingMoreFiles=false;dropZone.style.display='';fileInput.value='';setPhase(1);showToastWithUndo('Compilation réinitialisée',function(){fonctionnaires=undoBackup.fonctionnaires;contractuels=undoBackup.contractuels;fileResults=undoBackup.fileResults;currentTab=undoBackup.currentTab;sortCol=undoBackup.sortCol;sortDir=undoBackup.sortDir;undoBackup=null;dropZone.style.display='none';document.getElementById('btnAddMore').style.display='';document.getElementById('fileList').classList.add('visible');renderFileList();setPhase(3);buildDashboard();document.getElementById('dashboard').classList.add('visible');showToast('Compilation restaurée');});if(undoTimer)clearTimeout(undoTimer);undoTimer=setTimeout(()=>{undoBackup=null;},6000);}
 
 // ══ MODAL FORM ══
-function openFormModal(){document.getElementById('formModal').classList.add('visible');}
-function closeFormModal(){document.getElementById('formModal').classList.remove('visible');}
+let formTargetProject=null; // {mode:'current'|'archive'|'new', archiveId, name, year}
+
+function openFormModal(){
+  formTargetProject=null;
+  document.getElementById('formStep1').style.display='';
+  document.getElementById('formStep2').style.display='none';
+  document.getElementById('formModalSub').textContent='Choisissez un projet puis ajoutez un agent.';
+  document.getElementById('formNewProjectName').value='';
+  document.getElementById('formNewProjectYear').value='2026';
+  buildProjectSelectorCards();
+  document.getElementById('formModal').classList.add('visible');
+}
+
+function buildProjectSelectorCards(){
+  const container=document.getElementById('projectSelectorCards');
+  let html='';
+  // Projet en cours (si actif)
+  if(projectInfo.name){
+    html+='<div class="proj-card-pick" onclick="formSelectCurrentProject()"><span class="pcp-icon">📂</span><div><div class="pcp-name">'+projectInfo.name+' (en cours)</div><div class="pcp-meta">Année '+projectInfo.year+' — '+(fonctionnaires.length+contractuels.length)+' agents</div></div><span class="pcp-count">Actif</span></div>';
+  }
+  // Projets archivés
+  archivedProjects.slice().reverse().forEach(a=>{
+    // Ne pas afficher l'archive si c'est le même projet en cours
+    if(projectInfo.name&&a.name===projectInfo.name&&a.year===projectInfo.year)return;
+    html+='<div class="proj-card-pick" onclick="formSelectArchivedProject('+a.id+')"><span class="pcp-icon">📁</span><div><div class="pcp-name">'+a.name+'</div><div class="pcp-meta">Année '+a.year+' — '+a.totalAgents+' agents — '+a.date+'</div></div><span class="pcp-count">'+(a.fileNames||[]).length+' fich.</span></div>';
+  });
+  if(!html)html='<div style="text-align:center;padding:1rem;color:var(--ink-20);font-size:.85rem">Aucun projet existant. Créez-en un ci-dessous.</div>';
+  container.innerHTML=html;
+}
+
+function formSelectCurrentProject(){
+  formTargetProject={mode:'current'};
+  formGoToStep2(projectInfo.name+' ('+projectInfo.year+')');
+}
+
+function formSelectArchivedProject(id){
+  const a=archivedProjects.find(x=>x.id===id);
+  if(!a)return;
+  formTargetProject={mode:'archive',archiveId:id};
+  formGoToStep2(a.name+' ('+a.year+')');
+}
+
+function formSelectNewProject(){
+  const n=document.getElementById('formNewProjectName').value.trim();
+  const y=document.getElementById('formNewProjectYear').value;
+  if(!n){document.getElementById('formNewProjectName').focus();document.getElementById('formNewProjectName').style.borderColor='var(--red)';setTimeout(()=>document.getElementById('formNewProjectName').style.borderColor='',2000);showToast('Veuillez saisir un nom de projet');return;}
+  formTargetProject={mode:'new',name:n,year:y};
+  formGoToStep2(n+' ('+y+') — nouveau');
+}
+
+function formGoToStep2(label){
+  document.getElementById('formStep1').style.display='none';
+  document.getElementById('formStep2').style.display='';
+  document.getElementById('formProjectLabel').textContent=label;
+  document.getElementById('formModalSub').textContent='Ajoutez un agent au projet sélectionné.';
+  selectFormType('fonctionnaire');
+}
+
+function formBackToStep1(){
+  formTargetProject=null;
+  document.getElementById('formStep1').style.display='';
+  document.getElementById('formStep2').style.display='none';
+  document.getElementById('formModalSub').textContent='Choisissez un projet puis ajoutez un agent.';
+  buildProjectSelectorCards();
+}
+
+function closeFormModal(){document.getElementById('formModal').classList.remove('visible');formTargetProject=null;}
 function selectFormType(t){document.querySelectorAll('.form-type-card').forEach(c=>c.classList.remove('active'));document.querySelector('.form-type-card[data-type="'+t+'"]').classList.add('active');document.getElementById('modalFormFonc').style.display=t==='fonctionnaire'?'':'none';document.getElementById('modalFormCont').style.display=t==='contractuel'?'':'none';}
 function toggleBtn(b){b.classList.toggle('on');}
 function getToggle(id){return document.getElementById(id).classList.contains('on')?'Oui':'Non';}
 function val(id){return document.getElementById(id).value.trim();}
 function requireFields(ids){for(const id of ids){if(!val(id)){document.getElementById(id).focus();document.getElementById(id).style.borderColor='var(--red)';setTimeout(()=>document.getElementById(id).style.borderColor='',2000);showToast('Veuillez remplir tous les champs obligatoires');return false;}}return true;}
 
-function addFonctionnaire(){if(!requireFields(['mf_nom','mf_prenom','mf_dob','mf_collectivite','mf_categorie','mf_qualite','mf_adresse','mf_commune','mf_cp']))return;fonctionnaires.push({source:'Saisie manuelle',cst:getToggle('mf_cst'),cap_a:getToggle('mf_cap_a'),cap_b:getToggle('mf_cap_b'),cap_c:getToggle('mf_cap_c'),titre:val('mf_titre'),nom:val('mf_nom').toUpperCase(),nom_usage:val('mf_nom_usage'),prenom:val('mf_prenom'),dob:formatDateInput(val('mf_dob')),collectivite:val('mf_collectivite'),categorie:val('mf_categorie'),qualite:val('mf_qualite'),adresse:val('mf_adresse'),complement:val('mf_complement'),commune:val('mf_commune').toUpperCase(),cp:val('mf_cp')});resetModalForm('fonctionnaire');showToast('Fonctionnaire ajouté');if(document.getElementById('dashboard').classList.contains('visible'))buildDashboard();}
+// Activier le projet cible avant ajout
+function activateTargetProject(){
+  if(!formTargetProject){showToast('Aucun projet sélectionné');return false;}
+  if(formTargetProject.mode==='new'){
+    // Créer le projet et l'activer
+    projectInfo={name:formTargetProject.name,year:formTargetProject.year};
+    fonctionnaires=[];contractuels=[];fileResults=[];sortCol=-1;sortDir=1;currentTab='fonc';
+    document.getElementById('pbName').textContent=projectInfo.name;
+    document.getElementById('pbYear').textContent='Année '+projectInfo.year;
+    // Marquer comme current pour les prochains ajouts
+    formTargetProject={mode:'current'};
+    return true;
+  }
+  if(formTargetProject.mode==='archive'){
+    const a=archivedProjects.find(x=>x.id===formTargetProject.archiveId);
+    if(!a){showToast('Projet archivé introuvable');return false;}
+    // Charger l'archive comme projet actif
+    projectInfo={name:a.name,year:a.year};
+    fonctionnaires=[...a.fonctionnaires];contractuels=[...a.contractuels];fileResults=[...(a.fileResults||[])];
+    sortCol=-1;sortDir=1;currentTab='fonc';
+    document.getElementById('pbName').textContent=a.name;
+    document.getElementById('pbYear').textContent='Année '+a.year;
+    // Marquer comme current
+    formTargetProject={mode:'current'};
+    return true;
+  }
+  // mode==='current' — déjà actif
+  return true;
+}
 
-function addContractuel(){if(!requireFields(['mc_nom','mc_prenom','mc_dob','mc_collectivite','mc_type_contrat','mc_qualification','mc_adresse','mc_commune','mc_cp']))return;contractuels.push({source:'Saisie manuelle',cst:getToggle('mc_cst'),ccp:getToggle('mc_ccp'),titre:val('mc_titre'),nom:val('mc_nom').toUpperCase(),nom_usage:val('mc_nom_usage'),prenom:val('mc_prenom'),dob:formatDateInput(val('mc_dob')),collectivite:val('mc_collectivite'),type_contrat:val('mc_type_contrat'),qualification:val('mc_qualification'),date_debut:formatDateInput(val('mc_date_debut')),date_fin:formatDateInput(val('mc_date_fin')),adresse:val('mc_adresse'),complement:val('mc_complement'),commune:val('mc_commune').toUpperCase(),cp:val('mc_cp')});resetModalForm('contractuel');showToast('Contractuel ajouté');if(document.getElementById('dashboard').classList.contains('visible'))buildDashboard();}
+function refreshAfterManualAdd(){
+  // S'assurer que le dashboard est visible et à jour
+  if(fileResults.length){document.getElementById('fileList').classList.add('visible');renderFileList();}
+  setPhase(3);buildDashboard();
+  document.getElementById('dashboard').classList.add('visible');
+  document.getElementById('btnAddMore').style.display='';
+  document.getElementById('dropZone').style.display='none';
+  document.getElementById('btnCancelAdd').style.display='none';
+  isAddingMoreFiles=false;
+  // Basculer sur la vue compiler
+  switchView('viewCompiler');
+}
+
+function addFonctionnaire(){
+  if(!requireFields(['mf_nom','mf_prenom','mf_dob','mf_collectivite','mf_categorie','mf_qualite','mf_adresse','mf_commune','mf_cp']))return;
+  if(!activateTargetProject())return;
+  fonctionnaires.push({source:'Saisie manuelle',cst:getToggle('mf_cst'),cap_a:getToggle('mf_cap_a'),cap_b:getToggle('mf_cap_b'),cap_c:getToggle('mf_cap_c'),titre:val('mf_titre'),nom:val('mf_nom').toUpperCase(),nom_usage:val('mf_nom_usage'),prenom:val('mf_prenom'),dob:formatDateInput(val('mf_dob')),collectivite:val('mf_collectivite'),categorie:val('mf_categorie'),qualite:val('mf_qualite'),adresse:val('mf_adresse'),complement:val('mf_complement'),commune:val('mf_commune').toUpperCase(),cp:val('mf_cp')});
+  const agentName=val('mf_prenom')+' '+val('mf_nom').toUpperCase();
+  resetModalForm('fonctionnaire');
+  showFormSuccess('Fonctionnaire ajouté : '+agentName);
+  refreshAfterManualAdd();
+}
+
+function addContractuel(){
+  if(!requireFields(['mc_nom','mc_prenom','mc_dob','mc_collectivite','mc_type_contrat','mc_qualification','mc_adresse','mc_commune','mc_cp']))return;
+  if(!activateTargetProject())return;
+  contractuels.push({source:'Saisie manuelle',cst:getToggle('mc_cst'),ccp:getToggle('mc_ccp'),titre:val('mc_titre'),nom:val('mc_nom').toUpperCase(),nom_usage:val('mc_nom_usage'),prenom:val('mc_prenom'),dob:formatDateInput(val('mc_dob')),collectivite:val('mc_collectivite'),type_contrat:val('mc_type_contrat'),qualification:val('mc_qualification'),date_debut:formatDateInput(val('mc_date_debut')),date_fin:formatDateInput(val('mc_date_fin')),adresse:val('mc_adresse'),complement:val('mc_complement'),commune:val('mc_commune').toUpperCase(),cp:val('mc_cp')});
+  const agentName=val('mc_prenom')+' '+val('mc_nom').toUpperCase();
+  resetModalForm('contractuel');
+  showFormSuccess('Contractuel ajouté : '+agentName);
+  refreshAfterManualAdd();
+}
+
+function showFormSuccess(msg){
+  // Afficher un message de succès dans le formulaire
+  let el=document.getElementById('formSuccessMsg');
+  if(!el){el=document.createElement('div');el.id='formSuccessMsg';el.className='form-success-msg';document.getElementById('formStep2').insertBefore(el,document.getElementById('formStep2').children[1]);}
+  el.innerHTML='✅ '+msg;el.style.display='flex';
+  setTimeout(()=>{if(el)el.style.display='none';},4000);
+  showToast('✅ '+msg);
+}
 
 function resetModalForm(t){if(t==='fonctionnaire'){['mf_titre','mf_nom','mf_nom_usage','mf_prenom','mf_dob','mf_collectivite','mf_categorie','mf_qualite','mf_adresse','mf_complement','mf_commune','mf_cp'].forEach(id=>document.getElementById(id).value='');['mf_cst','mf_cap_a','mf_cap_b','mf_cap_c'].forEach(id=>document.getElementById(id).classList.remove('on'));}else{['mc_titre','mc_nom','mc_nom_usage','mc_prenom','mc_dob','mc_collectivite','mc_type_contrat','mc_qualification','mc_date_debut','mc_date_fin','mc_adresse','mc_complement','mc_commune','mc_cp'].forEach(id=>document.getElementById(id).value='');['mc_cst','mc_ccp'].forEach(id=>document.getElementById(id).classList.remove('on'));}}
 document.getElementById('formModal').addEventListener('click',function(e){if(e.target===this)closeFormModal();});
