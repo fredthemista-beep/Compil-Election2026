@@ -6,6 +6,9 @@
 <title>Deckod — Élections Professionnelles 2026</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Fraunces:ital,wght@0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
 <style>
 :root {
   --ink: #0c1222;
@@ -98,6 +101,15 @@ body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink-60)
 .dz-cancel{display:inline-flex;align-items:center;gap:.4rem;margin-top:.75rem;padding:.55rem 1.2rem;background:var(--white);color:var(--red);border:1.5px solid var(--ink-05);border-radius:var(--radius);font-family:'Outfit';font-weight:600;font-size:.82rem;cursor:pointer;transition:.25s var(--ease)}
 .dz-cancel:hover{border-color:var(--red);background:var(--red-l)}
 #fileInput{display:none}
+.dz-formats{display:flex;gap:.5rem;justify-content:center;margin-top:.75rem;flex-wrap:wrap}
+.dz-format{padding:.3rem .7rem;border-radius:50px;font-size:.72rem;font-weight:600;letter-spacing:.03em;border:1.5px solid var(--ink-10);color:var(--ink-40);background:var(--white)}
+.dz-f-xlsx{border-color:#16a34a40;color:var(--green);background:#dcfce7}
+.dz-f-pdf{border-color:#dc262640;color:var(--red);background:#fef2f2}
+.dz-f-zip{border-color:#d9770640;color:var(--amber);background:#fffbeb}
+.da-icon{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:var(--radius);border:1.5px solid var(--ink-05);background:var(--white);cursor:pointer;font-size:1.1rem;transition:.25s var(--ease);color:var(--ink-40);flex-shrink:0}
+.da-icon:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-xl);transform:translateY(-1px);box-shadow:var(--shadow-1)}
+.fi-note{font-size:.7rem;cursor:help;opacity:.7}
+@media print{.header,.project-bar,.phases,.drop-zone,.processing,.file-list,.dash-actions,.search-bar,.toast,.modal-overlay,.nav-btn,.pb-actions{display:none!important}.main{padding:0}.dashboard{box-shadow:none;border:none}.stat-card{break-inside:avoid}}
 .processing{display:none;text-align:center;padding:3rem 2rem}
 .processing.visible{display:block;animation:fadeIn .4s var(--ease)}
 .proc-spinner{width:48px;height:48px;border:3px solid var(--ink-05);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 1rem}
@@ -228,11 +240,11 @@ tbody tr:nth-child(even):hover{background:var(--blue-xl)}
 <div class="view" id="viewCompiler">
 <div class="project-bar"><div class="pb-info"><div class="pb-icon">📁</div><div><div class="pb-name" id="pbName">—</div><div class="pb-year" id="pbYear">—</div></div></div><div class="pb-actions"><button class="da-btn da-secondary" id="btnAddMore" style="display:none" onclick="addMoreFiles()">+ Ajouter des fichiers</button><button class="da-btn da-secondary" onclick="switchView('viewProject')">← Projets</button></div></div>
 <div class="phases"><div class="phase active" id="ph1"><div class="pnum">1</div><div class="plabel">Import</div></div><div class="phase" id="ph2"><div class="pnum">2</div><div class="plabel">Compilation</div></div><div class="phase" id="ph3"><div class="pnum">3</div><div class="plabel">Tableau de bord</div></div><div class="phase" id="ph4"><div class="pnum">4</div><div class="plabel">Export</div></div></div>
-<div class="drop-zone" id="dropZone"><div class="dz-icon">📂</div><div class="dz-title">Glissez vos fichiers Excel ici</div><div class="dz-sub">ou cliquez pour sélectionner — <b>.xlsx uniquement</b></div><button class="dz-btn" onclick="event.stopPropagation();document.getElementById('fileInput').click()">📎 Parcourir les fichiers</button><br><button class="dz-cancel" id="btnCancelAdd" style="display:none" onclick="event.stopPropagation();cancelAddFiles()">✕ Annuler</button><input type="file" id="fileInput" accept=".xlsx" multiple></div>
+<div class="drop-zone" id="dropZone"><div class="dz-icon">📂</div><div class="dz-title">Glissez vos fichiers ici</div><div class="dz-sub">ou cliquez pour sélectionner — <b>.xlsx, .pdf, .zip</b></div><div class="dz-formats"><span class="dz-format dz-f-xlsx">📊 Excel</span><span class="dz-format dz-f-pdf">📄 PDF</span><span class="dz-format dz-f-zip">📦 ZIP</span></div><button class="dz-btn" onclick="event.stopPropagation();document.getElementById('fileInput').click()">📎 Parcourir les fichiers</button><br><button class="dz-cancel" id="btnCancelAdd" style="display:none" onclick="event.stopPropagation();cancelAddFiles()">✕ Annuler</button><input type="file" id="fileInput" accept=".xlsx,.xls,.pdf,.zip" multiple></div>
 <div class="processing" id="processing"><div class="proc-spinner"></div><div class="proc-text" id="procText">Compilation en cours...</div><div class="proc-detail" id="procDetail">0 / 0</div><div class="proc-bar-bg"><div class="proc-bar" id="procBar"></div></div></div>
 <div class="file-list" id="fileList"><div class="fl-header"><span class="fl-title">Fichiers traités</span><span class="fl-count" id="flCount">0</span></div><div class="fl-grid" id="flGrid"></div></div>
 <div class="dashboard" id="dashboard">
-<div class="dash-actions"><button class="da-btn da-primary" onclick="exportXLSX()">📥 Exporter (.xlsx)</button><button class="da-btn da-gdrive" onclick="exportToGoogleDrive()">📂 Google Drive</button><button class="da-btn da-archive" onclick="archiveProject()">📚 Sauvegarder</button><button class="da-btn da-secondary" onclick="addMoreFiles()">+ Ajouter des fichiers</button><button class="da-btn da-danger" onclick="resetCompiler()">↺ Nouvelle compilation</button></div>
+<div class="dash-actions"><button class="da-btn da-primary" onclick="exportXLSX()">📥 Exporter (.xlsx)</button><button class="da-btn da-gdrive" onclick="exportToGoogleDrive()">📂 Google Drive</button><button class="da-btn da-archive" onclick="archiveProject()">📚 Sauvegarder</button><button class="da-btn da-secondary" onclick="addMoreFiles()">+ Ajouter des fichiers</button><button class="da-btn da-danger" onclick="resetCompiler()">↺ Nouvelle compilation</button><button class="da-icon" onclick="printDashboard()" title="Imprimer">🖨️</button><button class="da-icon" onclick="shareDashboard()" title="Partager">🔗</button></div>
 <div class="search-bar"><input class="sb-input" id="globalSearch" placeholder="Rechercher un agent (nom, prénom, collectivité...)" oninput="renderTable()"><span class="sb-label">Type :</span><select class="sb-select" id="filterType" onchange="onFilterTypeChange()"><option value="fonc">Fonctionnaires</option><option value="cont">Contractuels</option></select><span class="sb-label">Source :</span><select class="sb-select" id="filterSource" onchange="renderTable()"><option value="">Toutes</option></select><span class="sb-label">Scrutin :</span><select class="sb-select" id="filterScrutin" onchange="renderTable()"><option value="">Tous</option></select><span class="sb-label">Catégorie :</span><select class="sb-select" id="filterCategorie" onchange="renderTable()"><option value="">Toutes</option><option value="A">A</option><option value="B">B</option><option value="C">C</option></select></div>
 <div class="stat-row" id="statRow"></div><div class="detail-grid" id="detailGrid"></div>
 <div class="table-section"><div class="tab-bar"><button class="tab-btn active" onclick="switchTab('fonc')">🏛️ Fonctionnaires <span class="tab-count" id="tabCountF">0</span></button><button class="tab-btn" onclick="switchTab('cont')">📋 Contractuels <span class="tab-count" id="tabCountC">0</span></button></div><div class="ts-header"><div class="ts-title" id="tsTitle">🏛️ Fonctionnaires</div><div class="ts-controls"><span style="font-size:.8rem;color:var(--ink-40)" id="resultCount"></span></div></div><div class="table-wrap" id="tableWrap"></div></div>
@@ -261,19 +273,143 @@ dropZone.addEventListener('click',e=>{if(e.target.tagName!=='BUTTON')fileInput.c
 dropZone.addEventListener('drop',e=>handleFiles(e.dataTransfer.files));
 fileInput.addEventListener('change',e=>handleFiles(e.target.files));
 
-function addMoreFiles(){isAddingMoreFiles=true;dropZone.style.display='';document.getElementById('btnCancelAdd').style.display='';setPhase(1);fileInput.value='';showToast('Glissez ou sélectionnez des fichiers supplémentaires');}
+function addMoreFiles(){isAddingMoreFiles=true;dropZone.style.display='';document.getElementById('btnCancelAdd').style.display='';setPhase(1);fileInput.value='';showToast('Glissez ou sélectionnez des fichiers supplémentaires (Excel, PDF, ZIP)');}
 function cancelAddFiles(){isAddingMoreFiles=false;dropZone.style.display='none';document.getElementById('btnCancelAdd').style.display='none';if(fonctionnaires.length||contractuels.length)setPhase(3);showToast('Ajout annulé');}
 
-async function handleFiles(fl){const files=Array.from(fl).filter(f=>f.name.toLowerCase().endsWith('.xlsx')&&!f.name.startsWith('~$'));if(!files.length){showToast('Aucun fichier .xlsx trouvé');return;}if(!isAddingMoreFiles){fonctionnaires=[];contractuels=[];fileResults=[];sortCol=-1;sortDir=1;}isAddingMoreFiles=false;document.getElementById('btnCancelAdd').style.display='none';setPhase(2);document.getElementById('processing').classList.add('visible');dropZone.style.display='none';const t=files.length;for(let i=0;i<t;i++){document.getElementById('procText').textContent='Compilation en cours...';document.getElementById('procDetail').textContent=(i+1)+' / '+t+' — '+files[i].name;document.getElementById('procBar').style.width=((i+1)/t*100)+'%';await processFile(files[i]);if(i%10===0)await new Promise(r=>setTimeout(r,0));}document.getElementById('processing').classList.remove('visible');document.getElementById('fileList').classList.add('visible');renderFileList();setPhase(3);buildDashboard();document.getElementById('dashboard').classList.add('visible');document.getElementById('btnAddMore').style.display='';showToast(t+' fichier(s) compilé(s) — '+(fonctionnaires.length+contractuels.length)+' agents');}
+async function handleFiles(fl){
+  const allFiles=Array.from(fl).filter(f=>!f.name.startsWith('~$'));
+  if(!allFiles.length){showToast('Aucun fichier valide');return;}
+  if(!isAddingMoreFiles){fonctionnaires=[];contractuels=[];fileResults=[];sortCol=-1;sortDir=1;}
+  isAddingMoreFiles=false;document.getElementById('btnCancelAdd').style.display='none';
+  setPhase(2);document.getElementById('processing').classList.add('visible');dropZone.style.display='none';
 
-function processFile(file){return new Promise(resolve=>{const reader=new FileReader();reader.onload=function(e){try{const data=new Uint8Array(e.target.result),wb=XLSX.read(data,{type:'array',cellDates:true});const h1=wb.SheetNames.includes('Feuillet 1 FONCTIONNAIRES STAGI'),h2=wb.SheetNames.includes('Feuillet 2 CONTRACTUELS');if(!h1&&!h2){fileResults.push({name:file.name,status:'skip',fonc:0,cont:0});resolve();return;}let cf=0,cc=0;if(h1){const ws=wb.Sheets['Feuillet 1 FONCTIONNAIRES STAGI'],rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});for(let r=1;r<rows.length;r++){const row=rows[r],nom=String(row[5]||'').trim(),prenom=String(row[7]||'').trim(),coll=String(row[9]||'').trim();if(!nom&&!prenom&&!coll)continue;fonctionnaires.push({source:file.name,cst:fmt(row[0]),cap_a:fmt(row[1]),cap_b:fmt(row[2]),cap_c:fmt(row[3]),titre:fmt(row[4]),nom:nom.toUpperCase(),nom_usage:fmt(row[6]),prenom:prenom,dob:fmtDate(row[8]),collectivite:coll,categorie:fmt(row[10]),qualite:fmt(row[11]),adresse:fmt(row[12]),complement:fmt(row[14]),commune:fmt(row[15]).toUpperCase(),cp:fmt(row[16])});cf++;}}if(h2){const ws=wb.Sheets['Feuillet 2 CONTRACTUELS'],rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});for(let r=1;r<rows.length;r++){const row=rows[r],nom=String(row[3]||'').trim(),prenom=String(row[5]||'').trim(),coll=String(row[7]||'').trim();if(!nom&&!prenom&&!coll)continue;contractuels.push({source:file.name,cst:fmt(row[0]),ccp:fmt(row[1]),titre:fmt(row[2]),nom:nom.toUpperCase(),nom_usage:fmt(row[4]),prenom:prenom,dob:fmtDate(row[6]),collectivite:coll,type_contrat:fmt(row[8]),qualification:fmt(row[9]),date_debut:fmtDate(row[10]),date_fin:fmtDate(row[11]),adresse:fmt(row[12]),complement:fmt(row[14]),commune:fmt(row[15]).toUpperCase(),cp:fmt(row[16])});cc++;}}fileResults.push({name:file.name,status:'ok',fonc:cf,cont:cc});}catch(err){fileResults.push({name:file.name,status:'err',fonc:0,cont:0});}resolve();};reader.readAsArrayBuffer(file);});}
+  // Séparer les types de fichiers
+  const toProcess=[];
+  for(const f of allFiles){
+    const ext=f.name.toLowerCase().split('.').pop();
+    if(ext==='zip'){
+      document.getElementById('procText').textContent='Décompression du ZIP...';
+      document.getElementById('procDetail').textContent=f.name;
+      try{
+        const buf=await f.arrayBuffer();
+        const zip=await JSZip.loadAsync(buf);
+        const entries=Object.values(zip.files).filter(zf=>!zf.dir&&!zf.name.startsWith('__MACOSX')&&!zf.name.startsWith('.')&&(zf.name.toLowerCase().endsWith('.xlsx')||zf.name.toLowerCase().endsWith('.xls')||zf.name.toLowerCase().endsWith('.pdf')));
+        for(const zf of entries){
+          const blob=await zf.async('blob');
+          const fname=zf.name.split('/').pop();
+          const extracted=new File([blob],fname,{type:fname.endsWith('.pdf')?'application/pdf':'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+          toProcess.push({file:extracted,fromZip:f.name});
+        }
+        if(!entries.length)fileResults.push({name:f.name,status:'skip',fonc:0,cont:0,note:'ZIP vide ou sans fichier Excel/PDF'});
+      }catch(err){fileResults.push({name:f.name,status:'err',fonc:0,cont:0,note:'Erreur décompression ZIP'});}
+    }else if(ext==='xlsx'||ext==='xls'||ext==='pdf'){
+      toProcess.push({file:f,fromZip:null});
+    }else{
+      fileResults.push({name:f.name,status:'skip',fonc:0,cont:0,note:'Format non supporté'});
+    }
+  }
+
+  const t=toProcess.length;
+  if(!t&&!fileResults.length){document.getElementById('processing').classList.remove('visible');dropZone.style.display='';setPhase(1);showToast('Aucun fichier Excel ou PDF trouvé');return;}
+  for(let i=0;i<t;i++){
+    const item=toProcess[i];
+    const label=item.fromZip?item.file.name+' (depuis '+item.fromZip+')':item.file.name;
+    document.getElementById('procText').textContent='Compilation en cours...';
+    document.getElementById('procDetail').textContent=(i+1)+' / '+t+' — '+label;
+    document.getElementById('procBar').style.width=((i+1)/t*100)+'%';
+    const ext=item.file.name.toLowerCase().split('.').pop();
+    if(ext==='pdf'){await processPdfFile(item.file,item.fromZip);}
+    else{await processExcelFile(item.file,item.fromZip);}
+    if(i%10===0)await new Promise(r=>setTimeout(r,0));
+  }
+  document.getElementById('processing').classList.remove('visible');
+  document.getElementById('fileList').classList.add('visible');
+  renderFileList();setPhase(3);buildDashboard();
+  document.getElementById('dashboard').classList.add('visible');
+  document.getElementById('btnAddMore').style.display='';
+  const totalFiles=allFiles.length;
+  showToast(totalFiles+' fichier(s) traité(s) — '+(fonctionnaires.length+contractuels.length)+' agents');
+}
+
+function processExcelFile(file,fromZip){return new Promise(resolve=>{const reader=new FileReader();reader.onload=function(e){try{const data=new Uint8Array(e.target.result),wb=XLSX.read(data,{type:'array',cellDates:true});const h1=wb.SheetNames.includes('Feuillet 1 FONCTIONNAIRES STAGI'),h2=wb.SheetNames.includes('Feuillet 2 CONTRACTUELS');const srcLabel=fromZip?file.name+' (ZIP: '+fromZip+')':file.name;if(!h1&&!h2){fileResults.push({name:srcLabel,status:'skip',fonc:0,cont:0,note:'Feuillets attendus non trouvés'});resolve();return;}let cf=0,cc=0;if(h1){const ws=wb.Sheets['Feuillet 1 FONCTIONNAIRES STAGI'],rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});for(let r=1;r<rows.length;r++){const row=rows[r],nom=String(row[5]||'').trim(),prenom=String(row[7]||'').trim(),coll=String(row[9]||'').trim();if(!nom&&!prenom&&!coll)continue;fonctionnaires.push({source:srcLabel,cst:fmt(row[0]),cap_a:fmt(row[1]),cap_b:fmt(row[2]),cap_c:fmt(row[3]),titre:fmt(row[4]),nom:nom.toUpperCase(),nom_usage:fmt(row[6]),prenom:prenom,dob:fmtDate(row[8]),collectivite:coll,categorie:fmt(row[10]),qualite:fmt(row[11]),adresse:fmt(row[12]),complement:fmt(row[14]),commune:fmt(row[15]).toUpperCase(),cp:fmt(row[16])});cf++;}}if(h2){const ws=wb.Sheets['Feuillet 2 CONTRACTUELS'],rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});for(let r=1;r<rows.length;r++){const row=rows[r],nom=String(row[3]||'').trim(),prenom=String(row[5]||'').trim(),coll=String(row[7]||'').trim();if(!nom&&!prenom&&!coll)continue;contractuels.push({source:srcLabel,cst:fmt(row[0]),ccp:fmt(row[1]),titre:fmt(row[2]),nom:nom.toUpperCase(),nom_usage:fmt(row[4]),prenom:prenom,dob:fmtDate(row[6]),collectivite:coll,type_contrat:fmt(row[8]),qualification:fmt(row[9]),date_debut:fmtDate(row[10]),date_fin:fmtDate(row[11]),adresse:fmt(row[12]),complement:fmt(row[14]),commune:fmt(row[15]).toUpperCase(),cp:fmt(row[16])});cc++;}}fileResults.push({name:srcLabel,status:'ok',fonc:cf,cont:cc});}catch(err){fileResults.push({name:file.name,status:'err',fonc:0,cont:0,note:err.message});}resolve();};reader.readAsArrayBuffer(file);});}
+
+async function processPdfFile(file,fromZip){
+  const srcLabel=fromZip?file.name+' (ZIP: '+fromZip+')':file.name;
+  try{
+    const buf=await file.arrayBuffer();
+    const pdf=await pdfjsLib.getDocument({data:buf}).promise;
+    let allText='';
+    for(let p=1;p<=pdf.numPages;p++){
+      const page=await pdf.getPage(p);
+      const tc=await page.getTextContent();
+      const lines=[];let lastY=null;
+      tc.items.forEach(item=>{
+        const y=Math.round(item.transform[5]);
+        if(lastY!==null&&Math.abs(y-lastY)>3)lines.push('\n');
+        lines.push(item.str);lastY=y;
+      });
+      allText+=lines.join(' ')+'\n\n';
+    }
+    // Tenter d'extraire des données tabulaires du PDF
+    const rows=allText.split('\n').map(l=>l.trim()).filter(Boolean);
+    let cf=0,cc=0,parsed=false;
+
+    // Stratégie 1 : Chercher des patterns de données électorales dans le PDF
+    // On cherche des lignes qui contiennent Oui/Non et des noms
+    const dataRows=[];
+    for(const row of rows){
+      // Détecter les lignes avec Oui/Non typiques des fichiers électoraux
+      const parts=row.split(/\s{2,}|\t/).map(s=>s.trim()).filter(Boolean);
+      if(parts.length>=8){
+        const hasOuiNon=parts.some(p=>/^(oui|non)$/i.test(p));
+        const hasName=parts.some(p=>/^[A-ZÉÈÊËÀÂÄÙÛÜÏÎÔÇŒ-]{2,}$/i.test(p));
+        if(hasOuiNon&&hasName)dataRows.push(parts);
+      }
+    }
+
+    if(dataRows.length>0){
+      // Tenter de mapper les colonnes comme un feuillet fonctionnaires (17 cols)
+      for(const parts of dataRows){
+        if(parts.length>=13){
+          // Essayer format fonctionnaire: CST, CAP A, CAP B, CAP C, Titre, Nom, Nom usage, Prénom, DOB, Collectivité, Cat, Qualité, Adresse...
+          const hasCategorie=parts.some(p=>/^[ABC]$/i.test(p));
+          const hasTitulaire=parts.some(p=>/^(titulaire|stagiaire)$/i.test(p));
+          if(hasCategorie||hasTitulaire){
+            const nom=parts.find(p=>/^[A-ZÉÈÊËÀÂÄÙÛÜÏÎÔÇŒ-]{2,}$/.test(p))||'';
+            fonctionnaires.push({source:srcLabel,cst:parts.find(p=>/^oui$/i.test(p))?'Oui':'Non',cap_a:'Non',cap_b:'Non',cap_c:'Non',titre:'',nom:nom.toUpperCase(),nom_usage:'',prenom:'',dob:'',collectivite:'',categorie:parts.find(p=>/^[ABC]$/i.test(p))||'',qualite:parts.find(p=>/^(titulaire|stagiaire)$/i.test(p))||'',adresse:'',complement:'',commune:'',cp:''});cf++;parsed=true;continue;
+          }
+          // Sinon essayer format contractuel
+          const hasContrat=parts.some(p=>/^(cdd|cdi)$/i.test(p));
+          if(hasContrat){
+            const nom=parts.find(p=>/^[A-ZÉÈÊËÀÂÄÙÛÜÏÎÔÇŒ-]{2,}$/.test(p))||'';
+            contractuels.push({source:srcLabel,cst:'Non',ccp:'Non',titre:'',nom:nom.toUpperCase(),nom_usage:'',prenom:'',dob:'',collectivite:'',type_contrat:parts.find(p=>/^(cdd|cdi)$/i.test(p)).toUpperCase()||'',qualification:'',date_debut:'',date_fin:'',adresse:'',complement:'',commune:'',cp:''});cc++;parsed=true;
+          }
+        }
+      }
+    }
+
+    if(!parsed){
+      // Stratégie 2 : Tenter de convertir via les tableaux PDF structurés
+      // Stocker le texte brut pour permettre à l'utilisateur de le voir
+      fileResults.push({name:srcLabel,status:'skip',fonc:0,cont:0,note:'PDF lu ('+pdf.numPages+' pages) — données non structurées comme les fichiers Excel attendus'});
+    }else{
+      fileResults.push({name:srcLabel,status:'ok',fonc:cf,cont:cc,note:'Extrait depuis PDF'});
+    }
+  }catch(err){
+    fileResults.push({name:srcLabel,status:'err',fonc:0,cont:0,note:'Erreur lecture PDF: '+err.message});
+  }
+}
+
+// Ancienne fonction renommée pour compatibilité
+function processFile(file){return processExcelFile(file,null);}
 
 function fmt(v){return v==null?'':String(v).trim();}
 function fmtDate(v){if(!v)return '';if(v instanceof Date){const d=v.getDate(),m=v.getMonth()+1,y=v.getFullYear();return(d<10?'0'+d:d)+'/'+(m<10?'0'+m:m)+'/'+y;}return String(v).trim();}
 function formatDateInput(v){if(!v)return '';const d=new Date(v);return d.toLocaleDateString('fr-FR');}
 function setPhase(n){for(let i=1;i<=4;i++){const el=document.getElementById('ph'+i);el.classList.remove('active','done');if(i<n)el.classList.add('done');if(i===n)el.classList.add('active');}}
 
-function renderFileList(){const ok=fileResults.filter(f=>f.status==='ok').length,err=fileResults.filter(f=>f.status==='err').length,skip=fileResults.filter(f=>f.status==='skip').length;document.getElementById('flCount').textContent=ok+' ok'+(err?' '+err+' err':'')+(skip?' '+skip+' ignoré':'');document.getElementById('flGrid').innerHTML=fileResults.map(f=>{const cls=f.status==='ok'?'fi-ok':f.status==='err'?'fi-err':'fi-skip';const label=f.status==='ok'?f.fonc+'F + '+f.cont+'C':f.status==='err'?'Erreur':'Ignoré';return '<div class="fl-item"><span class="fi-icon">📄</span><span class="fi-name" title="'+f.name+'">'+f.name+'</span><span class="fi-status '+cls+'">'+label+'</span></div>';}).join('');}
+function getFileIcon(name){const n=name.toLowerCase();if(n.includes('.pdf'))return '📄';if(n.includes('.zip'))return '📦';return '📊';}
+function renderFileList(){const ok=fileResults.filter(f=>f.status==='ok').length,err=fileResults.filter(f=>f.status==='err').length,skip=fileResults.filter(f=>f.status==='skip').length;document.getElementById('flCount').textContent=ok+' ok'+(err?' '+err+' err':'')+(skip?' '+skip+' ignoré':'');document.getElementById('flGrid').innerHTML=fileResults.map(f=>{const cls=f.status==='ok'?'fi-ok':f.status==='err'?'fi-err':'fi-skip';const label=f.status==='ok'?f.fonc+'F + '+f.cont+'C':f.status==='err'?'Erreur':'Ignoré';const note=f.note?'<span class="fi-note" title="'+f.note+'"> ℹ️</span>':'';return '<div class="fl-item"><span class="fi-icon">'+getFileIcon(f.name)+'</span><span class="fi-name" title="'+f.name+(f.note?' — '+f.note:'')+'">'+f.name+note+'</span><span class="fi-status '+cls+'">'+label+'</span></div>';}).join('');}
 
 function buildDashboard(){const tF=fonctionnaires.length,tC=contractuels.length,tA=tF+tC;const sources=new Set([...fonctionnaires.map(f=>f.source),...contractuels.map(c=>c.source)]);document.getElementById('statRow').innerHTML='<div class="stat-card blue"><div class="sc-label">Total agents</div><div class="sc-value">'+tA+'</div><div class="sc-sub">'+sources.size+' sources</div></div><div class="stat-card green"><div class="sc-label">Fonctionnaires</div><div class="sc-value">'+tF+'</div><div class="sc-sub">Titulaires & stagiaires</div></div><div class="stat-card orange"><div class="sc-label">Contractuels</div><div class="sc-value">'+tC+'</div><div class="sc-sub">CDD & CDI</div></div><div class="stat-card violet"><div class="sc-label">Fichiers traités</div><div class="sc-value">'+fileResults.length+'</div><div class="sc-sub">'+fileResults.filter(f=>f.status!=='ok').length+' erreur(s)</div></div>';const cstF=fonctionnaires.filter(f=>f.cst.toLowerCase()==='oui').length,cstC=contractuels.filter(c=>c.cst.toLowerCase()==='oui').length,capA=fonctionnaires.filter(f=>f.cap_a.toLowerCase()==='oui').length,capB=fonctionnaires.filter(f=>f.cap_b.toLowerCase()==='oui').length,capC=fonctionnaires.filter(f=>f.cap_c.toLowerCase()==='oui').length,ccp=contractuels.filter(c=>c.ccp.toLowerCase()==='oui').length;const catA=fonctionnaires.filter(f=>f.categorie.toUpperCase().includes('A')).length,catB=fonctionnaires.filter(f=>f.categorie.toUpperCase().includes('B')).length,catCn=fonctionnaires.filter(f=>f.categorie.toUpperCase().includes('C')).length;const cdd=contractuels.filter(c=>c.type_contrat.toUpperCase()==='CDD').length,cdi=contractuels.filter(c=>c.type_contrat.toUpperCase()==='CDI').length;const mS=Math.max(cstF+cstC,capA,capB,capC,ccp,1),mCat=Math.max(catA,catB,catCn,1),mCo=Math.max(cdd,cdi,1);function bar(v,m,c){return '<div class="dc-bar"><div class="dc-bar-fill '+c+'" style="width:'+(v/m*100)+'%"></div></div>';}document.getElementById('detailGrid').innerHTML='<div class="detail-card"><div class="dc-title">📊 Scrutins</div><div class="dc-row"><span class="dc-label">CST</span>'+bar(cstF+cstC,mS,'bar-blue')+'<span class="dc-val">'+(cstF+cstC)+'</span></div><div class="dc-row"><span class="dc-label">CAP A</span>'+bar(capA,mS,'bar-violet')+'<span class="dc-val">'+capA+'</span></div><div class="dc-row"><span class="dc-label">CAP B</span>'+bar(capB,mS,'bar-orange')+'<span class="dc-val">'+capB+'</span></div><div class="dc-row"><span class="dc-label">CAP C</span>'+bar(capC,mS,'bar-amber')+'<span class="dc-val">'+capC+'</span></div><div class="dc-row"><span class="dc-label">CCP</span>'+bar(ccp,mS,'bar-green')+'<span class="dc-val">'+ccp+'</span></div></div><div class="detail-card"><div class="dc-title">📋 Répartition</div><div class="dc-row"><span class="dc-label">Cat. A</span>'+bar(catA,mCat,'bar-blue')+'<span class="dc-val">'+catA+'</span></div><div class="dc-row"><span class="dc-label">Cat. B</span>'+bar(catB,mCat,'bar-violet')+'<span class="dc-val">'+catB+'</span></div><div class="dc-row"><span class="dc-label">Cat. C</span>'+bar(catCn,mCat,'bar-orange')+'<span class="dc-val">'+catCn+'</span></div><div style="border-top:1px solid var(--ink-05);margin:.5rem 0"></div><div class="dc-row"><span class="dc-label">CDD</span>'+bar(cdd,mCo,'bar-green')+'<span class="dc-val">'+cdd+'</span></div><div class="dc-row"><span class="dc-label">CDI</span>'+bar(cdi,mCo,'bar-blue')+'<span class="dc-val">'+cdi+'</span></div></div>';document.getElementById('tabCountF').textContent=tF;document.getElementById('tabCountC').textContent=tC;const sel=document.getElementById('filterSource');sel.innerHTML='<option value="">Toutes</option>'+Array.from(sources).sort().map(s=>'<option value="'+s+'">'+s+'</option>').join('');updateScrutinFilter();renderTable();}
 
@@ -404,6 +540,21 @@ document.getElementById('formModal').addEventListener('click',function(e){if(e.t
 
 function showToast(msg){const t=document.getElementById('toast');t.innerHTML=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3500);}
 function showToastWithUndo(msg,fn){const t=document.getElementById('toast');t.innerHTML=msg+' <button class="toast-undo" onclick="event.stopPropagation()">↺ Annuler</button>';t.querySelector('.toast-undo').addEventListener('click',function(){t.classList.remove('show');if(undoTimer)clearTimeout(undoTimer);fn();});t.classList.add('show');setTimeout(()=>t.classList.remove('show'),6000);}
+
+// ══ IMPRESSION ══
+function printDashboard(){window.print();}
+
+// ══ PARTAGE ══
+function shareDashboard(){
+  const url=window.location.href;
+  const text='Élections Professionnelles '+projectInfo.year+' — '+projectInfo.name+'\nTotal agents : '+(fonctionnaires.length+contractuels.length)+'\nFonctionnaires : '+fonctionnaires.length+' | Contractuels : '+contractuels.length;
+  if(navigator.share){
+    navigator.share({title:'Compilation Élections '+projectInfo.year,text:text,url:url}).catch(()=>{});
+  }else if(navigator.clipboard){
+    const full=text+'\n'+url;
+    navigator.clipboard.writeText(full).then(()=>showToast('🔗 Lien et résumé copiés dans le presse-papiers')).catch(()=>{prompt('Copiez ce lien :',url);});
+  }else{prompt('Copiez ce lien :',url);}
+}
 </script>
 </body>
 </html>
