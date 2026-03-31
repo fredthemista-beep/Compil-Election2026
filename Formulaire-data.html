@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Formulaire — Élections Professionnelles 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #0f1b35;
+  --navy-mid: #1b2a4a;
+  --blue: #2e5090;
+  --blue-accent: #4472c4;
+  --blue-light: #d6e4f0;
+  --blue-glow: #5b9bff;
+  --green: #548235;
+  --green-light: #e2efda;
+  --orange: #ed7d31;
+  --orange-light: #fce4d6;
+  --red: #c00000;
+  --white: #ffffff;
+  --ghost: #f7f9fc;
+  --gray-100: #f0f2f5;
+  --gray-200: #e1e5eb;
+  --gray-400: #9aa3b0;
+  --gray-600: #5a6577;
+  --gray-800: #2d3748;
+  --radius: 10px;
+  --radius-lg: 16px;
+  --shadow-sm: 0 1px 3px rgba(15,27,53,.08);
+  --shadow-md: 0 4px 16px rgba(15,27,53,.10);
+  --shadow-lg: 0 12px 40px rgba(15,27,53,.14);
+  --transition: .25s cubic-bezier(.4,0,.2,1);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--ghost);
+  color: var(--gray-800);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── DECORATIVE BG ── */
+body::before {
+  content: '';
+  position: fixed;
+  top: -30%; left: -10%;
+  width: 60vw; height: 60vw;
+  background: radial-gradient(circle, rgba(46,80,144,.07) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+body::after {
+  content: '';
+  position: fixed;
+  bottom: -20%; right: -15%;
+  width: 50vw; height: 50vw;
+  background: radial-gradient(circle, rgba(84,130,53,.06) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── HEADER ── */
+.header {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 60%, var(--blue) 100%);
+  padding: 2.5rem 2rem 2rem;
+  position: relative;
+  overflow: hidden;
+}
+.header::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--blue-accent), var(--green), var(--orange));
+}
+.header-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+.header h1 {
+  font-family: 'Playfair Display', serif;
+  font-weight: 800;
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  color: var(--white);
+  letter-spacing: -.02em;
+  line-height: 1.2;
+}
+.header p {
+  color: var(--blue-light);
+  font-size: .95rem;
+  margin-top: .5rem;
+  font-weight: 300;
+}
+.badge-row { display: flex; gap: .5rem; margin-top: 1rem; flex-wrap: wrap; }
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .3rem .75rem;
+  border-radius: 50px;
+  font-size: .75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.badge-cst  { background: rgba(68,114,196,.25); color: #a3c4f3; }
+.badge-cap  { background: rgba(237,125,49,.2);  color: #f5b88a; }
+.badge-ccp  { background: rgba(84,130,53,.25);  color: #a8d48a; }
+
+/* ── MAIN ── */
+.main { max-width: 900px; margin: 0 auto; padding: 2rem 1.25rem 4rem; position: relative; z-index: 1; }
+
+/* ── TYPE SELECTOR ── */
+.type-selector {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+.type-card {
+  background: var(--white);
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: var(--transition);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.type-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  opacity: 0;
+  transition: var(--transition);
+}
+.type-card:hover { border-color: var(--blue-accent); box-shadow: var(--shadow-md); transform: translateY(-2px); }
+.type-card.active { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(46,80,144,.15), var(--shadow-md); }
+.type-card.active::before { opacity: 1; }
+.type-card[data-type="fonctionnaire"]::before { background: var(--blue); }
+.type-card[data-type="contractuel"]::before { background: var(--green); }
+.type-card .icon { font-size: 2rem; margin-bottom: .5rem; }
+.type-card h3 { font-weight: 700; font-size: 1rem; margin-bottom: .25rem; }
+.type-card span { font-size: .8rem; color: var(--gray-400); }
+
+/* ── FORM SECTIONS ── */
+.form-container {
+  display: none;
+  animation: fadeSlideIn .4s ease forwards;
+}
+.form-container.visible { display: block; }
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.section {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem;
+  margin-bottom: 1.25rem;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--gray-200);
+  transition: var(--transition);
+}
+.section:hover { box-shadow: var(--shadow-md); }
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--navy);
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+.section-title .dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.dot-blue { background: var(--blue); }
+.dot-green { background: var(--green); }
+.dot-orange { background: var(--orange); }
+
+/* ── GRID ── */
+.field-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+}
+.field-grid .full { grid-column: 1 / -1; }
+
+/* ── FIELDS ── */
+.field { display: flex; flex-direction: column; }
+.field label {
+  font-size: .78rem;
+  font-weight: 600;
+  color: var(--gray-600);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  margin-bottom: .35rem;
+}
+.field label .req { color: var(--red); margin-left: 2px; }
+.field input, .field select {
+  padding: .65rem .85rem;
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius);
+  font-family: 'DM Sans', sans-serif;
+  font-size: .92rem;
+  color: var(--gray-800);
+  background: var(--white);
+  transition: var(--transition);
+  outline: none;
+}
+.field input:focus, .field select:focus {
+  border-color: var(--blue-accent);
+  box-shadow: 0 0 0 3px rgba(68,114,196,.12);
+}
+.field input::placeholder { color: var(--gray-400); }
+
+/* ── TOGGLE ROW (Oui/Non) ── */
+.toggle-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+  margin-bottom: .5rem;
+}
+.toggle-item { display: flex; align-items: center; gap: .5rem; }
+.toggle-item span {
+  font-size: .82rem;
+  font-weight: 600;
+  color: var(--gray-600);
+  min-width: 50px;
+}
+.toggle-btn {
+  position: relative;
+  width: 50px; height: 26px;
+  background: var(--gray-200);
+  border-radius: 13px;
+  cursor: pointer;
+  transition: var(--transition);
+  border: none;
+  outline: none;
+}
+.toggle-btn::after {
+  content: '';
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 20px; height: 20px;
+  background: var(--white);
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0,0,0,.2);
+  transition: var(--transition);
+}
+.toggle-btn.on { background: var(--blue-accent); }
+.toggle-btn.on::after { left: 27px; }
+
+/* ── BUTTONS ── */
+.actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: .5rem;
+  flex-wrap: wrap;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .8rem 1.6rem;
+  border: none;
+  border-radius: var(--radius);
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  font-size: .92rem;
+  cursor: pointer;
+  transition: var(--transition);
+  text-decoration: none;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--blue) 0%, var(--blue-accent) 100%);
+  color: var(--white);
+  box-shadow: 0 4px 14px rgba(46,80,144,.3);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(46,80,144,.4); }
+.btn-secondary {
+  background: var(--white);
+  color: var(--gray-800);
+  border: 1.5px solid var(--gray-200);
+}
+.btn-secondary:hover { border-color: var(--blue-accent); background: var(--blue-light); }
+.btn-danger {
+  background: var(--white);
+  color: var(--red);
+  border: 1.5px solid var(--gray-200);
+}
+.btn-danger:hover { border-color: var(--red); background: #fef2f2; }
+
+/* ── TABLE PREVIEW ── */
+.preview-section {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem;
+  margin-top: 2rem;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--gray-200);
+  display: none;
+}
+.preview-section.visible { display: block; animation: fadeSlideIn .4s ease forwards; }
+.preview-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: .8rem;
+  overflow-x: auto;
+  display: block;
+}
+.preview-table thead th {
+  background: var(--navy-mid);
+  color: var(--white);
+  padding: .6rem .5rem;
+  font-weight: 600;
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+}
+.preview-table thead th:first-child { border-radius: var(--radius) 0 0 0; }
+.preview-table thead th:last-child { border-radius: 0 var(--radius) 0 0; }
+.preview-table tbody td {
+  padding: .5rem;
+  border-bottom: 1px solid var(--gray-200);
+  white-space: nowrap;
+}
+.preview-table tbody tr:nth-child(even) { background: var(--gray-100); }
+.preview-table tbody tr:hover { background: var(--blue-light); }
+
+.tag {
+  display: inline-block;
+  padding: .15rem .5rem;
+  border-radius: 50px;
+  font-size: .72rem;
+  font-weight: 600;
+}
+.tag-oui { background: #dcfce7; color: #166534; }
+.tag-non { background: #fee2e2; color: #991b1b; }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed;
+  bottom: 2rem; right: 2rem;
+  background: var(--navy);
+  color: var(--white);
+  padding: 1rem 1.5rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  font-weight: 500;
+  transform: translateY(100px);
+  opacity: 0;
+  transition: var(--transition);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+
+/* ── COUNTER ── */
+.counter-bar {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+.counter-chip {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: 50px;
+  padding: .4rem .4rem .4rem .9rem;
+  font-size: .85rem;
+  font-weight: 500;
+  color: var(--gray-600);
+  box-shadow: var(--shadow-sm);
+}
+.counter-chip .num {
+  background: var(--blue);
+  color: var(--white);
+  border-radius: 50%;
+  width: 28px; height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: .82rem;
+}
+.counter-chip.green .num { background: var(--green); }
+
+/* ── DOWNLOAD ZONE ── */
+.download-zone {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--blue) 100%);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  text-align: center;
+  margin-top: 2rem;
+  display: none;
+}
+.download-zone.visible { display: block; animation: fadeSlideIn .4s ease forwards; }
+.download-zone h3 { color: var(--white); font-family: 'Playfair Display', serif; font-size: 1.2rem; margin-bottom: .5rem; }
+.download-zone p { color: var(--blue-light); font-size: .88rem; margin-bottom: 1.25rem; }
+.btn-download {
+  background: var(--white);
+  color: var(--navy);
+  padding: .85rem 2rem;
+  border-radius: var(--radius);
+  font-weight: 700;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: 'DM Sans', sans-serif;
+}
+.btn-download:hover { transform: scale(1.04); box-shadow: 0 6px 20px rgba(0,0,0,.25); }
+
+@media (max-width: 600px) {
+  .type-selector { grid-template-columns: 1fr; }
+  .field-grid { grid-template-columns: 1fr; }
+  .actions { flex-direction: column; }
+  .btn { width: 100%; justify-content: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-inner">
+    <h1>Élections Professionnelles 2026</h1>
+    <p>Formulaire de saisie — CST · CAP · CCP</p>
+    <div class="badge-row">
+      <span class="badge badge-cst">⚙ CST</span>
+      <span class="badge badge-cap">⚙ CAP A / B / C</span>
+      <span class="badge badge-ccp">⚙ CCP</span>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- Counters -->
+  <div class="counter-bar">
+    <div class="counter-chip"><span>Fonctionnaires</span><span class="num" id="countF">0</span></div>
+    <div class="counter-chip green"><span>Contractuels</span><span class="num" id="countC">0</span></div>
+  </div>
+
+  <!-- TYPE SELECTOR -->
+  <div class="type-selector">
+    <div class="type-card" data-type="fonctionnaire" onclick="selectType('fonctionnaire')">
+      <div class="icon">🏛️</div>
+      <h3>Fonctionnaire</h3>
+      <span>Titulaire ou Stagiaire</span>
+    </div>
+    <div class="type-card" data-type="contractuel" onclick="selectType('contractuel')">
+      <div class="icon">📋</div>
+      <h3>Contractuel</h3>
+      <span>CDD ou CDI</span>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════ -->
+  <!-- FORM FONCTIONNAIRE -->
+  <!-- ════════════════════════════════════ -->
+  <div id="form-fonctionnaire" class="form-container">
+
+    <div class="section">
+      <div class="section-title"><span class="dot dot-blue"></span> Scrutins</div>
+      <div class="toggle-row">
+        <div class="toggle-item"><span>CST</span><button type="button" class="toggle-btn" id="f_cst" onclick="toggleBtn(this)"></button></div>
+        <div class="toggle-item"><span>CAP A</span><button type="button" class="toggle-btn" id="f_cap_a" onclick="toggleBtn(this)"></button></div>
+        <div class="toggle-item"><span>CAP B</span><button type="button" class="toggle-btn" id="f_cap_b" onclick="toggleBtn(this)"></button></div>
+        <div class="toggle-item"><span>CAP C</span><button type="button" class="toggle-btn" id="f_cap_c" onclick="toggleBtn(this)"></button></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title"><span class="dot dot-orange"></span> Identité</div>
+      <div class="field-grid">
+        <div class="field">
+          <label>Titre <span class="req">*</span></label>
+          <select id="f_titre"><option value="">—</option><option>Monsieur</option><option>Madame</option></select>
+        </div>
+        <div class="field">
+          <label>Nom de naissance <span class="req">*</span></label>
+          <input type="text" id="f_nom" placeholder="Ex: DUPONT">
+        </div>
+        <div class="field">
+          <label>Nom d'usage</label>
+          <input type="text" id="f_nom_usage" placeholder="Si différent">
+        </div>
+        <div class="field">
+          <label>Prénom <span class="req">*</span></label>
+          <input type="text" id="f_prenom" placeholder="Ex: Marie">
+        </div>
+        <div class="field">
+          <label>Date de naissance <span class="req">*</span></label>
+          <input type="date" id="f_dob">
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title"><span class="dot dot-green"></span> Situation administrative</div>
+      <div class="field-grid">
+        <div class="field">
+          <label>Collectivité / Établissement <span class="req">*</span></label>
+          <input type="text" id="f_collectivite" placeholder="Ex: Mairie de…">
+        </div>
+        <div class="field">
+          <label>Catégorie (A / B / C) <span class="req">*</span></label>
+          <select id="f_categorie"><option value="">—</option><option>A</option><option>B</option><option>C</option></select>
+        </div>
+        <div class="field">
+          <label>Qualité <span class="req">*</span></label>
+          <select id="f_qualite"><option value="">—</option><option>Titulaire</option><option>Stagiaire</option></select>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title"><span class="dot dot-blue"></span> Adresse</div>
+      <div class="field-grid">
+        <div class="field full">
+          <label>Adresse (N° — Rue / Avenue / Résidence…) <span class="req">*</span></label>
+          <input type="text" id="f_adresse" placeholder="Ex: 12 rue de la République">
+        </div>
+        <div class="field">
+          <label>Complément d'adresse</label>
+          <input type="text" id="f_complement" placeholder="Bât., étage…">
+        </div>
+        <div class="field">
+          <label>Commune <span class="req">*</span></label>
+          <input type="text" id="f_commune" placeholder="Ex: Foix">
+        </div>
+        <div class="field">
+          <label>Code Postal <span class="req">*</span></label>
+          <input type="text" id="f_cp" placeholder="Ex: 09000" maxlength="5">
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary" onclick="addFonctionnaire()">✓ Ajouter l'agent</button>
+      <button class="btn btn-secondary" onclick="resetForm('fonctionnaire')">↺ Réinitialiser</button>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════ -->
+  <!-- FORM CONTRACTUEL -->
+  <!-- ════════════════════════════════════ -->
+  <div id="form-contractuel" class="form-container">
+
+    <div class="section">
+      <div class="section-title"><span class="dot dot-green"></span> Scrutins</div>
+      <div class="toggle-row">
+        <div class="toggle-item"><span>CST</span><button type="button" class="toggle-btn" id="c_cst" onclick="toggleBtn(this)"></button></div>
+        <div class="toggle-item"><span>CCP</span><button type="button" class="toggle-btn" id="c_ccp" onclick="toggleBtn(this)"></button></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title"><span class="dot dot-orange"></span> Identité</div>
+      <div class="field-grid">
+        <div class="field">
+          <label>Titre <span class="req">*</span></label>
+          <select id="c_titre"><option value="">—</option><option>Monsieur</option><option>Madame</option></select>
+        </div>
+        <div class="field">
+          <label>Nom de naissance <span class="req">*</span></label>
+          <input type="text" id="c_nom" placeholder="Ex: MARTIN">
+        </div>
+        <div class="field">
+          <label>Nom d'usage</label>
+          <input type="text" id="c_nom_usage" placeholder="Si différent">
+        </div>
+        <div class="field">
+          <label>Prénom <span class="req">*</span></label>
+          <input type="text" id="c_prenom" placeholder="Ex: Paul">
+        </div>
+        <div class="field">
+          <label>Date de naissance <span class="req">*</span></label>
+          <input type="date" id="c_dob">
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title"><span class="dot dot-green"></span> Situation contractuelle</div>
+      <div class="field-grid">
+        <div class="field">
+          <label>Collectivité / Établissement <span class="req">*</span></label>
+          <input type="text" id="c_collectivite" placeholder="Ex: Mairie de…">
+        </div>
+        <div class="field">
+          <label>Type de contrat <span class="req">*</span></label>
+          <select id="c_type_contrat"><option value="">—</option><option>CDD</option><option>CDI</option></select>
+        </div>
+        <div class="field">
+          <label>Qualification du contrat <span class="req">*</span></label>
+          <select id="c_qualification"><option value="">—</option><option>Public</option><option>Privé</option></select>
+        </div>
+        <div class="field">
+          <label>Date de début du contrat</label>
+          <input type="date" id="c_date_debut">
+        </div>
+        <div class="field">
+          <label>Date de fin du contrat</label>
+          <input type="date" id="c_date_fin">
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title"><span class="dot dot-blue"></span> Adresse</div>
+      <div class="field-grid">
+        <div class="field full">
+          <label>Adresse (N° — Rue / Avenue / Résidence…) <span class="req">*</span></label>
+          <input type="text" id="c_adresse" placeholder="Ex: 5 avenue du Général de Gaulle">
+        </div>
+        <div class="field">
+          <label>Complément d'adresse</label>
+          <input type="text" id="c_complement" placeholder="Bât., étage…">
+        </div>
+        <div class="field">
+          <label>Commune <span class="req">*</span></label>
+          <input type="text" id="c_commune" placeholder="Ex: Pamiers">
+        </div>
+        <div class="field">
+          <label>Code Postal <span class="req">*</span></label>
+          <input type="text" id="c_cp" placeholder="Ex: 09100" maxlength="5">
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary" onclick="addContractuel()">✓ Ajouter l'agent</button>
+      <button class="btn btn-secondary" onclick="resetForm('contractuel')">↺ Réinitialiser</button>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════ -->
+  <!-- PREVIEW TABLE -->
+  <!-- ════════════════════════════════════ -->
+  <div id="preview" class="preview-section">
+    <div class="section-title" style="margin-bottom:1rem"><span class="dot dot-blue"></span> Aperçu des saisies</div>
+    <div style="overflow-x:auto" id="tableWrapper"></div>
+    <div class="actions" style="margin-top:1rem">
+      <button class="btn btn-danger" onclick="clearAll()">🗑 Tout effacer</button>
+    </div>
+  </div>
+
+  <!-- DOWNLOAD -->
+  <div id="downloadZone" class="download-zone">
+    <h3>📥 Exporter vers Excel</h3>
+    <p>Le fichier généré reprend exactement la structure du fichier compilé<br>(onglets Fonctionnaires & Contractuels).</p>
+    <button class="btn-download" onclick="exportCSV()">Télécharger le fichier CSV</button>
+  </div>
+
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- SheetJS CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<script>
+// ── STATE ──
+const fonctionnaires = [];
+const contractuels = [];
+
+// ── TYPE SELECTOR ──
+function selectType(type) {
+  document.querySelectorAll('.type-card').forEach(c => c.classList.remove('active'));
+  document.querySelector(`.type-card[data-type="${type}"]`).classList.add('active');
+  document.getElementById('form-fonctionnaire').classList.toggle('visible', type === 'fonctionnaire');
+  document.getElementById('form-contractuel').classList.toggle('visible', type === 'contractuel');
+}
+
+// ── TOGGLES ──
+function toggleBtn(btn) {
+  btn.classList.toggle('on');
+}
+function getToggle(id) {
+  return document.getElementById(id).classList.contains('on') ? 'Oui' : 'Non';
+}
+
+// ── VALIDATION ──
+function val(id) { return document.getElementById(id).value.trim(); }
+function requireFields(ids) {
+  for (const id of ids) {
+    if (!val(id)) {
+      document.getElementById(id).focus();
+      document.getElementById(id).style.borderColor = 'var(--red)';
+      setTimeout(() => document.getElementById(id).style.borderColor = '', 2000);
+      showToast('⚠️ Veuillez remplir tous les champs obligatoires');
+      return false;
+    }
+  }
+  return true;
+}
+
+function formatDate(v) {
+  if (!v) return '';
+  const d = new Date(v);
+  return d.toLocaleDateString('fr-FR');
+}
+
+// ── ADD FONCTIONNAIRE ──
+function addFonctionnaire() {
+  if (!requireFields(['f_nom','f_prenom','f_dob','f_collectivite','f_categorie','f_qualite','f_adresse','f_commune','f_cp'])) return;
+  fonctionnaires.push({
+    source: val('f_collectivite'),
+    cst: getToggle('f_cst'),
+    cap_a: getToggle('f_cap_a'),
+    cap_b: getToggle('f_cap_b'),
+    cap_c: getToggle('f_cap_c'),
+    titre: val('f_titre'),
+    nom: val('f_nom').toUpperCase(),
+    nom_usage: val('f_nom_usage'),
+    prenom: val('f_prenom'),
+    dob: formatDate(val('f_dob')),
+    collectivite: val('f_collectivite'),
+    categorie: val('f_categorie'),
+    qualite: val('f_qualite').toUpperCase(),
+    adresse: val('f_adresse'),
+    complement: val('f_complement'),
+    commune: val('f_commune').toUpperCase(),
+    cp: val('f_cp')
+  });
+  updateUI();
+  resetForm('fonctionnaire');
+  showToast('✓ Fonctionnaire ajouté avec succès');
+}
+
+// ── ADD CONTRACTUEL ──
+function addContractuel() {
+  if (!requireFields(['c_nom','c_prenom','c_dob','c_collectivite','c_type_contrat','c_qualification','c_adresse','c_commune','c_cp'])) return;
+  contractuels.push({
+    source: val('c_collectivite'),
+    cst: getToggle('c_cst'),
+    ccp: getToggle('c_ccp'),
+    titre: val('c_titre'),
+    nom: val('c_nom').toUpperCase(),
+    nom_usage: val('c_nom_usage'),
+    prenom: val('c_prenom'),
+    dob: formatDate(val('c_dob')),
+    collectivite: val('c_collectivite'),
+    type_contrat: val('c_type_contrat'),
+    qualification: val('c_qualification'),
+    date_debut: formatDate(val('c_date_debut')),
+    date_fin: formatDate(val('c_date_fin')),
+    adresse: val('c_adresse'),
+    complement: val('c_complement'),
+    commune: val('c_commune').toUpperCase(),
+    cp: val('c_cp')
+  });
+  updateUI();
+  resetForm('contractuel');
+  showToast('✓ Contractuel ajouté avec succès');
+}
+
+// ── RESET ──
+function resetForm(type) {
+  if (type === 'fonctionnaire') {
+    ['f_titre','f_nom','f_nom_usage','f_prenom','f_dob','f_collectivite','f_categorie','f_qualite','f_adresse','f_complement','f_commune','f_cp'].forEach(id => document.getElementById(id).value = '');
+    ['f_cst','f_cap_a','f_cap_b','f_cap_c'].forEach(id => document.getElementById(id).classList.remove('on'));
+  } else {
+    ['c_titre','c_nom','c_nom_usage','c_prenom','c_dob','c_collectivite','c_type_contrat','c_qualification','c_date_debut','c_date_fin','c_adresse','c_complement','c_commune','c_cp'].forEach(id => document.getElementById(id).value = '');
+    ['c_cst','c_ccp'].forEach(id => document.getElementById(id).classList.remove('on'));
+  }
+}
+
+function tag(v) {
+  return v === 'Oui' ? '<span class="tag tag-oui">Oui</span>' : '<span class="tag tag-non">Non</span>';
+}
+
+// ── UPDATE UI ──
+function updateUI() {
+  document.getElementById('countF').textContent = fonctionnaires.length;
+  document.getElementById('countC').textContent = contractuels.length;
+  const total = fonctionnaires.length + contractuels.length;
+  const preview = document.getElementById('preview');
+  const dl = document.getElementById('downloadZone');
+  preview.classList.toggle('visible', total > 0);
+  dl.classList.toggle('visible', total > 0);
+  if (total === 0) { document.getElementById('tableWrapper').innerHTML = ''; return; }
+
+  let html = '';
+
+  if (fonctionnaires.length) {
+    html += `<h4 style="margin:0 0 .5rem;color:var(--blue);font-size:.9rem">🏛️ Fonctionnaires (${fonctionnaires.length})</h4>`;
+    html += `<table class="preview-table"><thead><tr>
+      <th>#</th><th>CST</th><th>CAP A</th><th>CAP B</th><th>CAP C</th>
+      <th>Nom</th><th>Prénom</th><th>Naissance</th><th>Collectivité</th>
+      <th>Cat.</th><th>Qualité</th><th>Commune</th><th>CP</th><th></th>
+    </tr></thead><tbody>`;
+    fonctionnaires.forEach((f, i) => {
+      html += `<tr>
+        <td>${i+1}</td><td>${tag(f.cst)}</td><td>${tag(f.cap_a)}</td><td>${tag(f.cap_b)}</td><td>${tag(f.cap_c)}</td>
+        <td><strong>${f.nom}</strong></td><td>${f.prenom}</td><td>${f.dob}</td><td>${f.collectivite}</td>
+        <td>${f.categorie}</td><td>${f.qualite}</td><td>${f.commune}</td><td>${f.cp}</td>
+        <td><button onclick="removeFonc(${i})" style="background:none;border:none;cursor:pointer;font-size:1rem" title="Supprimer">✕</button></td>
+      </tr>`;
+    });
+    html += '</tbody></table><br>';
+  }
+
+  if (contractuels.length) {
+    html += `<h4 style="margin:0 0 .5rem;color:var(--green);font-size:.9rem">📋 Contractuels (${contractuels.length})</h4>`;
+    html += `<table class="preview-table"><thead><tr>
+      <th>#</th><th>CST</th><th>CCP</th>
+      <th>Nom</th><th>Prénom</th><th>Naissance</th><th>Collectivité</th>
+      <th>Contrat</th><th>Qualif.</th><th>Début</th><th>Fin</th><th>Commune</th><th>CP</th><th></th>
+    </tr></thead><tbody>`;
+    contractuels.forEach((c, i) => {
+      html += `<tr>
+        <td>${i+1}</td><td>${tag(c.cst)}</td><td>${tag(c.ccp)}</td>
+        <td><strong>${c.nom}</strong></td><td>${c.prenom}</td><td>${c.dob}</td><td>${c.collectivite}</td>
+        <td>${c.type_contrat}</td><td>${c.qualification}</td><td>${c.date_debut}</td><td>${c.date_fin}</td>
+        <td>${c.commune}</td><td>${c.cp}</td>
+        <td><button onclick="removeCont(${i})" style="background:none;border:none;cursor:pointer;font-size:1rem" title="Supprimer">✕</button></td>
+      </tr>`;
+    });
+    html += '</tbody></table>';
+  }
+
+  document.getElementById('tableWrapper').innerHTML = html;
+}
+
+function removeFonc(i) { fonctionnaires.splice(i, 1); updateUI(); showToast('Agent supprimé'); }
+function removeCont(i) { contractuels.splice(i, 1); updateUI(); showToast('Agent supprimé'); }
+function clearAll() {
+  if (!confirm('Effacer toutes les saisies ?')) return;
+  fonctionnaires.length = 0;
+  contractuels.length = 0;
+  updateUI();
+  showToast('Toutes les saisies ont été effacées');
+}
+
+// ── EXPORT XLSX ──
+function exportCSV() {
+  if (typeof XLSX === 'undefined') {
+    showToast('⚠️ Bibliothèque Excel en cours de chargement, réessayez…');
+    return;
+  }
+
+  const wb = XLSX.utils.book_new();
+
+  // Fonctionnaires sheet
+  const f_headers = ['Source','CST','CAP A','CAP B','CAP C','Titre','Nom de naissance',
+    "Nom d'usage",'Prénom','Date de naissance','Collectivité / Établissement',
+    'Catégorie (A/B/C)','Qualité (Titulaire/Stagiaire)','Adresse',
+    "Complément d'adresse",'Commune','Code Postal'];
+  const f_data = fonctionnaires.map(f => [
+    f.source, f.cst, f.cap_a, f.cap_b, f.cap_c, f.titre, f.nom,
+    f.nom_usage, f.prenom, f.dob, f.collectivite, f.categorie,
+    f.qualite, f.adresse, f.complement, f.commune, f.cp
+  ]);
+  const ws1 = XLSX.utils.aoa_to_sheet([f_headers, ...f_data]);
+  ws1['!cols'] = f_headers.map((_, i) => ({ wch: i < 5 ? 8 : 20 }));
+  XLSX.utils.book_append_sheet(wb, ws1, 'Fonctionnaires');
+
+  // Contractuels sheet
+  const c_headers = ['Source','CST','CCP','Titre','Nom de naissance',"Nom d'usage",
+    'Prénom','Date de naissance','Collectivité / Établissement',
+    'Type contrat (CDD/CDI)','Qualification (Privé/Public)',
+    'Date début contrat','Date fin contrat','Adresse',
+    "Complément d'adresse",'Commune','Code Postal'];
+  const c_data = contractuels.map(c => [
+    c.source, c.cst, c.ccp, c.titre, c.nom, c.nom_usage,
+    c.prenom, c.dob, c.collectivite, c.type_contrat, c.qualification,
+    c.date_debut, c.date_fin, c.adresse, c.complement, c.commune, c.cp
+  ]);
+  const ws2 = XLSX.utils.aoa_to_sheet([c_headers, ...c_data]);
+  ws2['!cols'] = c_headers.map((_, i) => ({ wch: i < 3 ? 8 : 20 }));
+  XLSX.utils.book_append_sheet(wb, ws2, 'Contractuels');
+
+  XLSX.writeFile(wb, 'Elections_Pro_2026_Saisie.xlsx');
+  showToast('📥 Fichier Excel téléchargé !');
+}
+
+// ── TOAST ──
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+</script>
+
+</body>
+</html>

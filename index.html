@@ -1,0 +1,1607 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deckod — Élections Professionnelles 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Fraunces:ital,wght@0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root {
+  --ink: #0c1222;
+  --ink-80: #1e2a3f;
+  --ink-60: #334155;
+  --ink-40: #64748b;
+  --ink-20: #94a3b8;
+  --ink-10: #cbd5e1;
+  --ink-05: #e2e8f0;
+  --ink-02: #f1f5f9;
+  --paper: #f8fafc;
+  --white: #ffffff;
+  --blue: #2563eb;
+  --blue-d: #1d4ed8;
+  --blue-l: #dbeafe;
+  --blue-xl: #eff6ff;
+  --green: #16a34a;
+  --green-l: #dcfce7;
+  --orange: #ea580c;
+  --orange-l: #fff7ed;
+  --red: #dc2626;
+  --red-l: #fef2f2;
+  --amber: #d97706;
+  --amber-l: #fffbeb;
+  --violet: #7c3aed;
+  --violet-l: #f5f3ff;
+  --radius: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --shadow-1: 0 1px 3px rgba(12,18,34,.06), 0 1px 2px rgba(12,18,34,.04);
+  --shadow-2: 0 4px 14px rgba(12,18,34,.08);
+  --shadow-3: 0 12px 40px rgba(12,18,34,.12);
+  --shadow-4: 0 24px 60px rgba(12,18,34,.16);
+  --ease: cubic-bezier(.4,0,.2,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink-60);min-height:100vh;-webkit-font-smoothing:antialiased}
+
+/* ═══ HEADER ═══ */
+.header{background:var(--ink);position:relative;overflow:hidden}
+.header::before{content:'';position:absolute;inset:0;background:
+  radial-gradient(ellipse 80% 60% at 20% 100%, rgba(37,99,235,.15) 0%, transparent 70%),
+  radial-gradient(ellipse 60% 50% at 80% 0%, rgba(124,58,237,.1) 0%, transparent 70%);
+  pointer-events:none}
+.header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.1) 20%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.1) 80%,transparent)}
+.header-inner{max-width:1100px;margin:0 auto;padding:2rem 2rem 1.75rem;position:relative;z-index:1;
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+.header-left{}
+.header h1{font-family:'Fraunces',serif;font-weight:900;font-size:clamp(1.6rem,4vw,2.2rem);
+  color:#fff;letter-spacing:-.03em;line-height:1.15}
+.header h1 span{background:linear-gradient(135deg,#60a5fa,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header-sub{color:var(--ink-20);font-size:.88rem;margin-top:.35rem;font-weight:300;letter-spacing:.01em}
+.header-badges{display:flex;gap:.5rem;margin-top:.75rem;flex-wrap:wrap}
+.hbadge{padding:.25rem .6rem;border-radius:50px;font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.6);backdrop-filter:blur(4px)}
+.header-nav{display:flex;gap:.5rem;flex-wrap:wrap}
+.nav-btn{display:inline-flex;align-items:center;gap:.4rem;padding:.55rem 1.1rem;border-radius:var(--radius);
+  font-family:'Outfit';font-weight:600;font-size:.82rem;cursor:pointer;transition:.25s var(--ease);border:none;text-decoration:none}
+.nav-btn-form{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.15)}
+.nav-btn-form:hover{background:rgba(255,255,255,.2);transform:translateY(-1px)}
+.nav-btn-form.active{background:var(--blue);border-color:var(--blue)}
+
+/* ═══ MAIN LAYOUT ═══ */
+.main{max-width:1100px;margin:0 auto;padding:2rem 2rem 4rem}
+
+/* ═══ VIEW MANAGEMENT ═══ */
+.view{display:none}
+.view.active{display:block;animation:fadeIn .4s var(--ease)}
+
+/* ═══ PROJECT CREATION ═══ */
+.project-create{max-width:560px;margin:0 auto}
+.project-card{background:var(--white);border-radius:var(--radius-xl);padding:3rem 2.5rem;
+  box-shadow:var(--shadow-2);border:1px solid var(--ink-05);text-align:center}
+.project-card .pc-icon{font-size:3rem;margin-bottom:1rem}
+.project-card h2{font-family:'Fraunces',serif;font-weight:900;font-size:1.6rem;color:var(--ink);margin-bottom:.5rem}
+.project-card p{color:var(--ink-40);font-size:.9rem;margin-bottom:2rem}
+.pc-field{text-align:left;margin-bottom:1.25rem}
+.pc-field label{display:block;font-size:.78rem;font-weight:600;color:var(--ink-40);text-transform:uppercase;
+  letter-spacing:.05em;margin-bottom:.4rem}
+.pc-field input,.pc-field select{width:100%;padding:.7rem 1rem;border:1.5px solid var(--ink-05);border-radius:var(--radius);
+  font-family:'Outfit';font-size:.95rem;color:var(--ink);outline:none;transition:.2s var(--ease);background:var(--white)}
+.pc-field input:focus,.pc-field select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.pc-field input::placeholder{color:var(--ink-20)}
+.pc-btn{display:inline-flex;align-items:center;gap:.5rem;padding:.75rem 2rem;background:var(--blue);color:#fff;
+  border:none;border-radius:var(--radius);font-family:'Outfit';font-weight:700;font-size:.95rem;
+  cursor:pointer;transition:.25s var(--ease);margin-top:.5rem}
+.pc-btn:hover{background:var(--blue-d);transform:translateY(-2px);box-shadow:var(--shadow-2)}
+
+/* ═══ PROJECT HEADER BAR ═══ */
+.project-bar{display:flex;justify-content:space-between;align-items:center;padding:1rem 1.25rem;
+  background:var(--white);border-radius:var(--radius-lg);box-shadow:var(--shadow-1);border:1px solid var(--ink-05);
+  margin-bottom:1.5rem;flex-wrap:wrap;gap:.75rem}
+.pb-info{display:flex;align-items:center;gap:.75rem}
+.pb-icon{width:40px;height:40px;background:linear-gradient(135deg,var(--blue),var(--violet));border-radius:10px;
+  display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:#fff}
+.pb-name{font-family:'Fraunces',serif;font-weight:800;font-size:1.1rem;color:var(--ink)}
+.pb-year{font-size:.78rem;color:var(--ink-40);font-weight:500}
+.pb-actions{display:flex;gap:.5rem;flex-wrap:wrap}
+
+/* ═══ PHASE INDICATOR ═══ */
+.phases{display:flex;gap:0;margin-bottom:2rem;background:var(--white);border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-1);overflow:hidden;border:1px solid var(--ink-05)}
+.phase{flex:1;padding:1rem;text-align:center;position:relative;cursor:default;transition:.3s var(--ease)}
+.phase:not(:last-child)::after{content:'';position:absolute;right:0;top:20%;height:60%;width:1px;background:var(--ink-05)}
+.phase .pnum{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;
+  background:var(--ink-05);color:var(--ink-40);font-weight:700;font-size:.8rem;margin-bottom:.35rem;transition:.3s var(--ease)}
+.phase .plabel{font-size:.78rem;font-weight:600;color:var(--ink-20);text-transform:uppercase;letter-spacing:.05em;transition:.3s var(--ease)}
+.phase.active .pnum{background:var(--blue);color:#fff;box-shadow:0 0 0 4px rgba(37,99,235,.15)}
+.phase.active .plabel{color:var(--ink)}
+.phase.done .pnum{background:var(--green);color:#fff}
+.phase.done .plabel{color:var(--green)}
+
+/* ═══ DROP ZONE ═══ */
+.drop-zone{
+  background:var(--white);border:2px dashed var(--ink-10);border-radius:var(--radius-xl);
+  padding:3rem 2rem;text-align:center;cursor:pointer;transition:.3s var(--ease);
+  position:relative;overflow:hidden;
+}
+.drop-zone::before{content:'';position:absolute;inset:0;background:
+  repeating-linear-gradient(45deg,transparent,transparent 10px,rgba(37,99,235,.015) 10px,rgba(37,99,235,.015) 20px);
+  pointer-events:none;opacity:0;transition:.3s var(--ease)}
+.drop-zone:hover,.drop-zone.dragover{border-color:var(--blue);background:var(--blue-xl);transform:scale(1.005)}
+.drop-zone:hover::before,.drop-zone.dragover::before{opacity:1}
+.drop-zone.dragover{border-style:solid;box-shadow:0 0 0 4px rgba(37,99,235,.1)}
+.dz-icon{font-size:3rem;margin-bottom:.75rem;filter:grayscale(.3);transition:.3s var(--ease)}
+.drop-zone:hover .dz-icon,.drop-zone.dragover .dz-icon{filter:grayscale(0);transform:scale(1.1)}
+.dz-title{font-family:'Fraunces',serif;font-weight:800;font-size:1.3rem;color:var(--ink);margin-bottom:.35rem}
+.dz-sub{color:var(--ink-40);font-size:.88rem}
+.dz-sub b{color:var(--blue);font-weight:600}
+.dz-btn{display:inline-flex;align-items:center;gap:.4rem;margin-top:1.25rem;padding:.65rem 1.5rem;
+  background:var(--blue);color:#fff;border:none;border-radius:var(--radius);font-family:'Outfit';
+  font-weight:600;font-size:.88rem;cursor:pointer;transition:.25s var(--ease)}
+.dz-btn:hover{background:var(--blue-d);transform:translateY(-1px);box-shadow:var(--shadow-2)}
+#fileInput{display:none}
+
+/* ═══ PROCESSING ═══ */
+.processing{display:none;text-align:center;padding:3rem 2rem}
+.processing.visible{display:block;animation:fadeIn .4s var(--ease)}
+.proc-spinner{width:48px;height:48px;border:3px solid var(--ink-05);border-top-color:var(--blue);border-radius:50%;
+  animation:spin .8s linear infinite;margin:0 auto 1rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+.proc-text{font-weight:600;color:var(--ink);font-size:1rem}
+.proc-detail{color:var(--ink-40);font-size:.85rem;margin-top:.25rem}
+.proc-bar-bg{width:100%;max-width:400px;height:6px;background:var(--ink-05);border-radius:3px;margin:1rem auto 0;overflow:hidden}
+.proc-bar{height:100%;background:linear-gradient(90deg,var(--blue),var(--violet));border-radius:3px;transition:width .3s var(--ease);width:0}
+
+/* ═══ FILE LIST ═══ */
+.file-list{margin-top:1.5rem;display:none}
+.file-list.visible{display:block;animation:fadeIn .3s var(--ease)}
+.fl-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem}
+.fl-title{font-weight:700;color:var(--ink);font-size:1rem}
+.fl-count{font-size:.8rem;color:var(--ink-40);background:var(--ink-02);padding:.25rem .6rem;border-radius:50px}
+.fl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.5rem;max-height:240px;overflow-y:auto;
+  padding-right:.5rem}
+.fl-grid::-webkit-scrollbar{width:4px}
+.fl-grid::-webkit-scrollbar-thumb{background:var(--ink-10);border-radius:2px}
+.fl-item{display:flex;align-items:center;gap:.5rem;padding:.5rem .7rem;background:var(--white);
+  border:1px solid var(--ink-05);border-radius:var(--radius);font-size:.8rem;transition:.2s var(--ease)}
+.fl-item:hover{border-color:var(--ink-10);box-shadow:var(--shadow-1)}
+.fl-item .fi-icon{font-size:1.1rem}
+.fl-item .fi-name{flex:1;color:var(--ink-60);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fl-item .fi-status{font-size:.7rem;font-weight:700;padding:.15rem .4rem;border-radius:50px}
+.fi-ok{background:var(--green-l);color:var(--green)}
+.fi-err{background:var(--red-l);color:var(--red)}
+.fi-skip{background:var(--amber-l);color:var(--amber)}
+
+/* ═══ DASHBOARD ═══ */
+.dashboard{display:none;margin-top:2rem}
+.dashboard.visible{display:block;animation:fadeIn .5s var(--ease)}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+.dash-actions{display:flex;gap:.75rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.da-btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.2rem;border-radius:var(--radius);
+  font-family:'Outfit';font-weight:600;font-size:.85rem;cursor:pointer;transition:.25s var(--ease);border:none}
+.da-primary{background:var(--green);color:#fff;box-shadow:0 4px 14px rgba(22,163,74,.25)}
+.da-primary:hover{background:#15803d;transform:translateY(-1px);box-shadow:0 6px 20px rgba(22,163,74,.35)}
+.da-secondary{background:var(--white);color:var(--ink);border:1.5px solid var(--ink-05)}
+.da-secondary:hover{border-color:var(--blue);color:var(--blue)}
+.da-gdrive{background:#1a73e8;color:#fff;box-shadow:0 4px 14px rgba(26,115,232,.25)}
+.da-gdrive:hover{background:#1557b0;transform:translateY(-1px);box-shadow:0 6px 20px rgba(26,115,232,.35)}
+.da-archive{background:var(--violet);color:#fff;box-shadow:0 4px 14px rgba(124,58,237,.25)}
+.da-archive:hover{background:#6d28d9;transform:translateY(-1px)}
+.da-danger{background:var(--white);color:var(--red);border:1.5px solid var(--ink-05)}
+.da-danger:hover{border-color:var(--red)}
+
+/* ═══ STAT CARDS ═══ */
+.stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:1.5rem}
+.stat-card{background:var(--white);border-radius:var(--radius-lg);padding:1.25rem 1.5rem;
+  box-shadow:var(--shadow-1);border:1px solid var(--ink-05);position:relative;overflow:hidden;transition:.25s var(--ease)}
+.stat-card:hover{box-shadow:var(--shadow-2);transform:translateY(-2px)}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.stat-card.blue::before{background:linear-gradient(90deg,var(--blue),#818cf8)}
+.stat-card.green::before{background:linear-gradient(90deg,var(--green),#34d399)}
+.stat-card.orange::before{background:linear-gradient(90deg,var(--orange),var(--amber))}
+.stat-card.violet::before{background:linear-gradient(90deg,var(--violet),#c084fc)}
+.sc-label{font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-40);margin-bottom:.25rem}
+.sc-value{font-family:'Fraunces',serif;font-weight:900;font-size:2rem;color:var(--ink);line-height:1.1}
+.sc-sub{font-size:.78rem;color:var(--ink-20);margin-top:.15rem}
+
+/* ═══ DETAIL SECTIONS ═══ */
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem}
+@media(max-width:700px){.detail-grid{grid-template-columns:1fr}}
+.detail-card{background:var(--white);border-radius:var(--radius-lg);padding:1.25rem;
+  box-shadow:var(--shadow-1);border:1px solid var(--ink-05)}
+.dc-title{font-family:'Fraunces',serif;font-weight:800;font-size:1rem;color:var(--ink);margin-bottom:.75rem;
+  display:flex;align-items:center;gap:.4rem}
+.dc-row{display:flex;justify-content:space-between;align-items:center;padding:.45rem 0;
+  border-bottom:1px solid var(--ink-02);font-size:.85rem}
+.dc-row:last-child{border-bottom:none}
+.dc-label{color:var(--ink-40)}
+.dc-val{font-weight:700;color:var(--ink)}
+.dc-bar{flex:1;max-width:100px;height:6px;background:var(--ink-05);border-radius:3px;margin:0 .75rem;overflow:hidden}
+.dc-bar-fill{height:100%;border-radius:3px;transition:width .6s var(--ease)}
+.bar-blue{background:var(--blue)}
+.bar-green{background:var(--green)}
+.bar-orange{background:var(--orange)}
+.bar-red{background:var(--red)}
+.bar-violet{background:var(--violet)}
+.bar-amber{background:var(--amber)}
+
+/* ═══ DATA TABLE ═══ */
+.table-section{background:var(--white);border-radius:var(--radius-lg);box-shadow:var(--shadow-1);
+  border:1px solid var(--ink-05);overflow:hidden;margin-bottom:1.5rem}
+.ts-header{display:flex;justify-content:space-between;align-items:center;padding:1rem 1.25rem;
+  border-bottom:1px solid var(--ink-05);flex-wrap:wrap;gap:.5rem}
+.ts-title{font-family:'Fraunces',serif;font-weight:800;font-size:1rem;color:var(--ink);display:flex;align-items:center;gap:.4rem}
+.ts-controls{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+.ts-search{padding:.4rem .7rem;border:1.5px solid var(--ink-05);border-radius:var(--radius);
+  font-family:'Outfit';font-size:.82rem;outline:none;transition:.2s var(--ease);width:220px}
+.ts-search:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.ts-select{padding:.4rem .5rem;border:1.5px solid var(--ink-05);border-radius:var(--radius);
+  font-family:'Outfit';font-size:.82rem;outline:none;background:var(--white);cursor:pointer}
+.table-wrap{overflow-x:auto;max-height:500px;overflow-y:auto}
+.table-wrap::-webkit-scrollbar{height:6px;width:6px}
+.table-wrap::-webkit-scrollbar-thumb{background:var(--ink-10);border-radius:3px}
+table{width:100%;border-collapse:collapse;font-size:.8rem}
+thead{position:sticky;top:0;z-index:2}
+thead th{background:var(--ink);color:#fff;padding:.6rem .5rem;font-weight:600;white-space:nowrap;
+  text-align:left;cursor:pointer;user-select:none;transition:.2s var(--ease)}
+thead th:hover{background:var(--ink-80)}
+thead th.sorted-asc::after{content:' ▲';font-size:.6rem}
+thead th.sorted-desc::after{content:' ▼';font-size:.6rem}
+tbody td{padding:.45rem .5rem;border-bottom:1px solid var(--ink-02);white-space:nowrap}
+tbody tr:hover{background:var(--blue-xl)}
+tbody tr:nth-child(even){background:var(--ink-02)}
+tbody tr:nth-child(even):hover{background:var(--blue-xl)}
+.tag{display:inline-block;padding:.1rem .45rem;border-radius:50px;font-size:.7rem;font-weight:700}
+.tag-oui{background:var(--green-l);color:var(--green)}
+.tag-non{background:var(--red-l);color:var(--red)}
+.empty-state{text-align:center;padding:2rem;color:var(--ink-20)}
+
+/* ═══ TABS ═══ */
+.tab-bar{display:flex;gap:0;border-bottom:2px solid var(--ink-05);margin-bottom:0}
+.tab-btn{padding:.65rem 1.25rem;font-family:'Outfit';font-weight:600;font-size:.85rem;
+  color:var(--ink-40);background:none;border:none;cursor:pointer;position:relative;transition:.2s var(--ease)}
+.tab-btn:hover{color:var(--ink)}
+.tab-btn.active{color:var(--blue)}
+.tab-btn.active::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:2px;background:var(--blue)}
+.tab-count{background:var(--ink-05);color:var(--ink-40);padding:.1rem .4rem;border-radius:50px;font-size:.7rem;margin-left:.3rem}
+.tab-btn.active .tab-count{background:var(--blue-l);color:var(--blue)}
+
+/* ═══ GLOBAL SEARCH BAR ═══ */
+.search-bar{background:var(--white);border-radius:var(--radius-lg);box-shadow:var(--shadow-1);
+  border:1px solid var(--ink-05);padding:1rem 1.25rem;margin-bottom:1.5rem;display:flex;gap:.75rem;align-items:center;flex-wrap:wrap}
+.search-bar .sb-input{flex:1;min-width:200px;padding:.55rem 1rem .55rem 2.2rem;border:1.5px solid var(--ink-05);
+  border-radius:var(--radius);font-family:'Outfit';font-size:.9rem;outline:none;transition:.2s var(--ease);
+  background:var(--ink-02) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85zm-5.242.656a5 5 0 1 1 0-10 5 5 0 0 1 0 10z'/%3E%3C/svg%3E") no-repeat .7rem center}
+.search-bar .sb-input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1);background-color:var(--white)}
+.search-bar .sb-select{padding:.55rem .7rem;border:1.5px solid var(--ink-05);border-radius:var(--radius);
+  font-family:'Outfit';font-size:.82rem;outline:none;background:var(--white);cursor:pointer}
+.search-bar .sb-label{font-size:.78rem;font-weight:600;color:var(--ink-40);white-space:nowrap}
+
+/* ═══ ARCHIVE SECTION ═══ */
+.archive-section{background:var(--white);border-radius:var(--radius-lg);box-shadow:var(--shadow-1);
+  border:1px solid var(--ink-05);padding:1.25rem;margin-bottom:1.5rem}
+.archive-title{font-family:'Fraunces',serif;font-weight:800;font-size:1rem;color:var(--ink);margin-bottom:.75rem;
+  display:flex;align-items:center;gap:.4rem}
+.archive-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.5rem;max-height:200px;overflow-y:auto}
+.archive-item{display:flex;align-items:center;gap:.5rem;padding:.6rem .75rem;background:var(--ink-02);
+  border-radius:var(--radius);font-size:.82rem;transition:.2s var(--ease);cursor:pointer;border:1px solid transparent}
+.archive-item:hover{border-color:var(--blue);background:var(--blue-xl)}
+.archive-item .ai-name{flex:1;color:var(--ink-60);font-weight:500}
+.archive-item .ai-date{color:var(--ink-20);font-size:.72rem}
+.archive-item .ai-count{font-size:.7rem;font-weight:700;color:var(--blue);background:var(--blue-l);padding:.15rem .4rem;border-radius:50px}
+.archive-item .ai-delete{background:none;border:none;cursor:pointer;color:var(--ink-20);font-size:.9rem;padding:.2rem;transition:.2s}
+.archive-item .ai-delete:hover{color:var(--red)}
+
+/* ═══ MODAL OVERLAY ═══ */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(12,18,34,.5);z-index:100;
+  align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal-overlay.visible{display:flex;animation:fadeIn .2s var(--ease)}
+.modal{background:var(--white);border-radius:var(--radius-xl);padding:2rem;width:90%;max-width:900px;
+  max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-4);position:relative}
+.modal-close{position:absolute;top:1rem;right:1rem;background:var(--ink-02);border:none;width:32px;height:32px;
+  border-radius:50%;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  color:var(--ink-40);transition:.2s var(--ease)}
+.modal-close:hover{background:var(--red-l);color:var(--red)}
+
+/* ═══ FORM STYLES (in modal) ═══ */
+.form-section{margin-bottom:1.25rem;padding:1.25rem;background:var(--ink-02);border-radius:var(--radius-lg)}
+.form-section-title{font-family:'Fraunces',serif;font-weight:800;font-size:.95rem;color:var(--ink);margin-bottom:1rem;
+  display:flex;align-items:center;gap:.4rem}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.75rem}
+.form-grid .full{grid-column:1/-1}
+.form-field{display:flex;flex-direction:column}
+.form-field label{font-size:.75rem;font-weight:600;color:var(--ink-40);text-transform:uppercase;
+  letter-spacing:.04em;margin-bottom:.3rem}
+.form-field label .req{color:var(--red);margin-left:2px}
+.form-field input,.form-field select{padding:.55rem .75rem;border:1.5px solid var(--ink-05);border-radius:8px;
+  font-family:'Outfit';font-size:.88rem;color:var(--ink);outline:none;transition:.2s var(--ease);background:var(--white)}
+.form-field input:focus,.form-field select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.form-field input::placeholder{color:var(--ink-20)}
+.toggle-row{display:flex;flex-wrap:wrap;gap:.75rem}
+.toggle-item{display:flex;align-items:center;gap:.5rem}
+.toggle-item span{font-size:.82rem;font-weight:600;color:var(--ink-40);min-width:45px}
+.toggle-btn{position:relative;width:46px;height:24px;background:var(--ink-10);border-radius:12px;
+  cursor:pointer;transition:.2s var(--ease);border:none;outline:none}
+.toggle-btn::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;
+  background:#fff;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:.2s var(--ease)}
+.toggle-btn.on{background:var(--blue)}
+.toggle-btn.on::after{left:24px}
+.form-type-selector{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1.5rem}
+.form-type-card{padding:1rem;border:2px solid var(--ink-05);border-radius:var(--radius);cursor:pointer;
+  text-align:center;transition:.2s var(--ease);background:var(--white)}
+.form-type-card:hover{border-color:var(--blue);box-shadow:var(--shadow-1)}
+.form-type-card.active{border-color:var(--blue);background:var(--blue-xl);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.form-type-card .ftc-icon{font-size:1.5rem;margin-bottom:.25rem}
+.form-type-card h4{font-weight:700;font-size:.88rem;color:var(--ink)}
+.form-type-card span{font-size:.75rem;color:var(--ink-40)}
+.form-actions{display:flex;gap:.75rem;margin-top:1rem;flex-wrap:wrap}
+.form-actions .da-btn{flex:unset}
+
+/* ═══ TOAST ═══ */
+.toast{position:fixed;bottom:2rem;right:2rem;background:var(--ink);color:#fff;padding:.85rem 1.25rem;
+  border-radius:var(--radius);box-shadow:var(--shadow-3);font-weight:500;font-size:.88rem;
+  transform:translateY(100px);opacity:0;transition:.35s var(--ease);z-index:999;display:flex;align-items:center;gap:.5rem}
+.toast.show{transform:translateY(0);opacity:1}
+
+/* ═══ GOOGLE DRIVE INFO ═══ */
+.gdrive-info{font-size:.78rem;color:var(--ink-40);margin-top:.5rem}
+
+/* ═══ RESPONSIVE ═══ */
+@media(max-width:600px){
+  .stat-row{grid-template-columns:1fr 1fr}
+  .phases{flex-wrap:wrap}
+  .phase{min-width:33%}
+  .fl-grid{grid-template-columns:1fr}
+  .dash-actions{flex-direction:column}
+  .da-btn{width:100%;justify-content:center}
+  .header-inner{flex-direction:column;align-items:flex-start}
+  .header-nav{width:100%}
+  .nav-btn{flex:1;justify-content:center}
+  .form-type-selector{grid-template-columns:1fr}
+  .search-bar{flex-direction:column}
+  .search-bar .sb-input{width:100%}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════ -->
+<!-- HEADER -->
+<!-- ═══════════════════════════════════ -->
+<div class="header">
+  <div class="header-inner">
+    <div class="header-left">
+      <h1>Deckod <span>Elections Pro 2026</span></h1>
+      <p class="header-sub">Centre de Gestion de la Fonction Publique Territoriale de l'Ariege (09)</p>
+      <div class="header-badges">
+        <span class="hbadge">CST</span><span class="hbadge">CAP A / B / C</span><span class="hbadge">CCP</span>
+      </div>
+    </div>
+    <div class="header-nav">
+      <button class="nav-btn nav-btn-form" id="navFormBtn" onclick="openFormModal()">+ Saisie manuelle</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ -->
+<!-- MAIN -->
+<!-- ═══════════════════════════════════ -->
+<div class="main">
+
+  <!-- ══ VIEW: PROJECT CREATION ══ -->
+  <div class="view active" id="viewProject">
+    <div class="project-create">
+      <div class="project-card">
+        <div class="pc-icon">📁</div>
+        <h2>Creer un projet</h2>
+        <p>Definissez le nom et l'annee de votre projet avant de commencer l'import des fichiers Excel.</p>
+        <div class="pc-field">
+          <label>Nom du projet</label>
+          <input type="text" id="projectName" placeholder="Ex: Elections CDG 09">
+        </div>
+        <div class="pc-field">
+          <label>Annee</label>
+          <select id="projectYear">
+            <option value="2025">2025</option>
+            <option value="2026" selected>2026</option>
+            <option value="2027">2027</option>
+            <option value="2028">2028</option>
+          </select>
+        </div>
+        <button class="pc-btn" onclick="createProject()">Creer le projet →</button>
+      </div>
+
+      <!-- ARCHIVED PROJECTS -->
+      <div class="archive-section" id="archiveSection" style="margin-top:1.5rem;display:none">
+        <div class="archive-title">📚 Projets archives</div>
+        <div class="archive-list" id="archiveList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ VIEW: COMPILER ══ -->
+  <div class="view" id="viewCompiler">
+
+    <!-- Project bar -->
+    <div class="project-bar" id="projectBar">
+      <div class="pb-info">
+        <div class="pb-icon">📁</div>
+        <div>
+          <div class="pb-name" id="pbName">—</div>
+          <div class="pb-year" id="pbYear">—</div>
+        </div>
+      </div>
+      <div class="pb-actions">
+        <button class="da-btn da-secondary" onclick="addMoreFiles()" id="btnAddMore" style="display:none">+ Ajouter des fichiers</button>
+        <button class="da-btn da-secondary" onclick="switchView('viewProject')">← Projets</button>
+      </div>
+    </div>
+
+    <!-- PHASES -->
+    <div class="phases">
+      <div class="phase active" id="ph1"><div class="pnum">1</div><div class="plabel">Import</div></div>
+      <div class="phase" id="ph2"><div class="pnum">2</div><div class="plabel">Compilation</div></div>
+      <div class="phase" id="ph3"><div class="pnum">3</div><div class="plabel">Tableau de bord</div></div>
+      <div class="phase" id="ph4"><div class="pnum">4</div><div class="plabel">Export</div></div>
+    </div>
+
+    <!-- DROP ZONE -->
+    <div class="drop-zone" id="dropZone">
+      <div class="dz-icon">📂</div>
+      <div class="dz-title">Glissez vos fichiers Excel ici</div>
+      <div class="dz-sub">ou cliquez pour selectionner — <b>.xlsx uniquement</b></div>
+      <button class="dz-btn" onclick="document.getElementById('fileInput').click()">📎 Parcourir les fichiers</button>
+      <input type="file" id="fileInput" accept=".xlsx" multiple>
+    </div>
+
+    <!-- PROCESSING -->
+    <div class="processing" id="processing">
+      <div class="proc-spinner"></div>
+      <div class="proc-text" id="procText">Compilation en cours...</div>
+      <div class="proc-detail" id="procDetail">0 / 0 fichiers traites</div>
+      <div class="proc-bar-bg"><div class="proc-bar" id="procBar"></div></div>
+    </div>
+
+    <!-- FILE LIST -->
+    <div class="file-list" id="fileList">
+      <div class="fl-header">
+        <span class="fl-title">Fichiers traites</span>
+        <span class="fl-count" id="flCount">0 fichiers</span>
+      </div>
+      <div class="fl-grid" id="flGrid"></div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="dashboard" id="dashboard">
+      <!-- ACTION BUTTONS -->
+      <div class="dash-actions">
+        <button class="da-btn da-primary" onclick="exportXLSX()">📥 Exporter (.xlsx)</button>
+        <button class="da-btn da-gdrive" onclick="exportToGoogleDrive()">
+          <svg width="16" height="16" viewBox="0 0 87.3 78" fill="none"><path d="M6.6 66.85L3.3 61.35 29.25 17.4h7.2l25.95 43.95-3.3 5.5H6.6z" fill="#0066DA"/><path d="M43.65 25.05L56.55 3.45h6.6L76.05 25.05 49.35 66.85h-6.6L43.65 25.05z" fill="#00AC47"/><path d="M27.6 78L0 31.35 13.2 8.55l27.6 47.85L27.6 78z" fill="#EA4335"/><path d="M73.55 78L60.35 55.2l13.2-22.8 13.2 22.8L73.55 78z" fill="#00832D"/><path d="M27.6 78l13.2-22.8h32.75L60.35 78H27.6z" fill="#2684FC"/><path d="M13.2 8.55L26.4 31.35 0 31.35 13.2 8.55z" fill="#FFBA00"/></svg>
+          Exporter vers Google Drive
+        </button>
+        <button class="da-btn da-archive" onclick="archiveProject()">📚 Sauvegarder / Archiver</button>
+        <button class="da-btn da-secondary" onclick="addMoreFiles()">+ Ajouter des fichiers</button>
+        <button class="da-btn da-secondary" onclick="resetCompiler()">↺ Nouvelle compilation</button>
+      </div>
+
+      <!-- GLOBAL SEARCH & FILTERS -->
+      <div class="search-bar">
+        <input class="sb-input" id="globalSearch" placeholder="Rechercher un agent (nom, prenom, collectivite...)" oninput="renderTable()">
+        <span class="sb-label">Type :</span>
+        <select class="sb-select" id="filterType" onchange="onFilterTypeChange()">
+          <option value="fonc">Fonctionnaires</option>
+          <option value="cont">Contractuels</option>
+        </select>
+        <span class="sb-label">Source :</span>
+        <select class="sb-select" id="filterSource" onchange="renderTable()"><option value="">Toutes</option></select>
+        <span class="sb-label">Scrutin :</span>
+        <select class="sb-select" id="filterScrutin" onchange="renderTable()"><option value="">Tous</option></select>
+        <span class="sb-label">Categorie :</span>
+        <select class="sb-select" id="filterCategorie" onchange="renderTable()">
+          <option value="">Toutes</option>
+          <option value="A">A</option>
+          <option value="B">B</option>
+          <option value="C">C</option>
+        </select>
+      </div>
+
+      <!-- STATS -->
+      <div class="stat-row" id="statRow"></div>
+
+      <!-- DETAILS -->
+      <div class="detail-grid" id="detailGrid"></div>
+
+      <!-- DATA TABLES -->
+      <div class="table-section">
+        <div class="tab-bar" id="tabBar">
+          <button class="tab-btn active" onclick="switchTab('fonc')">🏛️ Fonctionnaires <span class="tab-count" id="tabCountF">0</span></button>
+          <button class="tab-btn" onclick="switchTab('cont')">📋 Contractuels <span class="tab-count" id="tabCountC">0</span></button>
+        </div>
+        <div class="ts-header">
+          <div class="ts-title" id="tsTitle">🏛️ Fonctionnaires</div>
+          <div class="ts-controls">
+            <span style="font-size:.8rem;color:var(--ink-40)" id="resultCount"></span>
+          </div>
+        </div>
+        <div class="table-wrap" id="tableWrap"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ -->
+<!-- MODAL: FORMULAIRE DE SAISIE -->
+<!-- ═══════════════════════════════════ -->
+<div class="modal-overlay" id="formModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeFormModal()">✕</button>
+    <h2 style="font-family:'Fraunces',serif;font-weight:900;font-size:1.4rem;color:var(--ink);margin-bottom:.25rem">Saisie manuelle</h2>
+    <p style="color:var(--ink-40);font-size:.85rem;margin-bottom:1.5rem">Ajoutez un agent directement aux donnees compilees.</p>
+
+    <!-- Type selector -->
+    <div class="form-type-selector">
+      <div class="form-type-card active" data-type="fonctionnaire" onclick="selectFormType('fonctionnaire')">
+        <div class="ftc-icon">🏛️</div>
+        <h4>Fonctionnaire</h4>
+        <span>Titulaire ou Stagiaire</span>
+      </div>
+      <div class="form-type-card" data-type="contractuel" onclick="selectFormType('contractuel')">
+        <div class="ftc-icon">📋</div>
+        <h4>Contractuel</h4>
+        <span>CDD ou CDI</span>
+      </div>
+    </div>
+
+    <!-- FORM: Fonctionnaire -->
+    <div id="modalFormFonc" class="modal-form-container">
+      <div class="form-section">
+        <div class="form-section-title">📊 Scrutins</div>
+        <div class="toggle-row">
+          <div class="toggle-item"><span>CST</span><button type="button" class="toggle-btn" id="mf_cst" onclick="toggleBtn(this)"></button></div>
+          <div class="toggle-item"><span>CAP A</span><button type="button" class="toggle-btn" id="mf_cap_a" onclick="toggleBtn(this)"></button></div>
+          <div class="toggle-item"><span>CAP B</span><button type="button" class="toggle-btn" id="mf_cap_b" onclick="toggleBtn(this)"></button></div>
+          <div class="toggle-item"><span>CAP C</span><button type="button" class="toggle-btn" id="mf_cap_c" onclick="toggleBtn(this)"></button></div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">👤 Identite</div>
+        <div class="form-grid">
+          <div class="form-field">
+            <label>Titre <span class="req">*</span></label>
+            <select id="mf_titre"><option value="">—</option><option>Monsieur</option><option>Madame</option></select>
+          </div>
+          <div class="form-field">
+            <label>Nom de naissance <span class="req">*</span></label>
+            <input type="text" id="mf_nom" placeholder="Ex: DUPONT">
+          </div>
+          <div class="form-field">
+            <label>Nom d'usage</label>
+            <input type="text" id="mf_nom_usage" placeholder="Si different">
+          </div>
+          <div class="form-field">
+            <label>Prenom <span class="req">*</span></label>
+            <input type="text" id="mf_prenom" placeholder="Ex: Marie">
+          </div>
+          <div class="form-field">
+            <label>Date de naissance <span class="req">*</span></label>
+            <input type="date" id="mf_dob">
+          </div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">🏢 Situation administrative</div>
+        <div class="form-grid">
+          <div class="form-field">
+            <label>Collectivite / Etablissement <span class="req">*</span></label>
+            <input type="text" id="mf_collectivite" placeholder="Ex: Mairie de...">
+          </div>
+          <div class="form-field">
+            <label>Categorie (A / B / C) <span class="req">*</span></label>
+            <select id="mf_categorie"><option value="">—</option><option>A</option><option>B</option><option>C</option></select>
+          </div>
+          <div class="form-field">
+            <label>Qualite <span class="req">*</span></label>
+            <select id="mf_qualite"><option value="">—</option><option>Titulaire</option><option>Stagiaire</option></select>
+          </div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">📍 Adresse</div>
+        <div class="form-grid">
+          <div class="form-field full">
+            <label>Adresse <span class="req">*</span></label>
+            <input type="text" id="mf_adresse" placeholder="Ex: 12 rue de la Republique">
+          </div>
+          <div class="form-field">
+            <label>Complement d'adresse</label>
+            <input type="text" id="mf_complement" placeholder="Bat., etage...">
+          </div>
+          <div class="form-field">
+            <label>Commune <span class="req">*</span></label>
+            <input type="text" id="mf_commune" placeholder="Ex: Foix">
+          </div>
+          <div class="form-field">
+            <label>Code Postal <span class="req">*</span></label>
+            <input type="text" id="mf_cp" placeholder="Ex: 09000" maxlength="5">
+          </div>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="da-btn da-primary" onclick="addFonctionnaire()">✓ Ajouter l'agent</button>
+        <button class="da-btn da-secondary" onclick="resetModalForm('fonctionnaire')">↺ Reinitialiser</button>
+      </div>
+    </div>
+
+    <!-- FORM: Contractuel -->
+    <div id="modalFormCont" class="modal-form-container" style="display:none">
+      <div class="form-section">
+        <div class="form-section-title">📊 Scrutins</div>
+        <div class="toggle-row">
+          <div class="toggle-item"><span>CST</span><button type="button" class="toggle-btn" id="mc_cst" onclick="toggleBtn(this)"></button></div>
+          <div class="toggle-item"><span>CCP</span><button type="button" class="toggle-btn" id="mc_ccp" onclick="toggleBtn(this)"></button></div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">👤 Identite</div>
+        <div class="form-grid">
+          <div class="form-field">
+            <label>Titre <span class="req">*</span></label>
+            <select id="mc_titre"><option value="">—</option><option>Monsieur</option><option>Madame</option></select>
+          </div>
+          <div class="form-field">
+            <label>Nom de naissance <span class="req">*</span></label>
+            <input type="text" id="mc_nom" placeholder="Ex: MARTIN">
+          </div>
+          <div class="form-field">
+            <label>Nom d'usage</label>
+            <input type="text" id="mc_nom_usage" placeholder="Si different">
+          </div>
+          <div class="form-field">
+            <label>Prenom <span class="req">*</span></label>
+            <input type="text" id="mc_prenom" placeholder="Ex: Paul">
+          </div>
+          <div class="form-field">
+            <label>Date de naissance <span class="req">*</span></label>
+            <input type="date" id="mc_dob">
+          </div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">🏢 Situation contractuelle</div>
+        <div class="form-grid">
+          <div class="form-field">
+            <label>Collectivite / Etablissement <span class="req">*</span></label>
+            <input type="text" id="mc_collectivite" placeholder="Ex: Mairie de...">
+          </div>
+          <div class="form-field">
+            <label>Type de contrat <span class="req">*</span></label>
+            <select id="mc_type_contrat"><option value="">—</option><option>CDD</option><option>CDI</option></select>
+          </div>
+          <div class="form-field">
+            <label>Qualification <span class="req">*</span></label>
+            <select id="mc_qualification"><option value="">—</option><option>Public</option><option>Prive</option></select>
+          </div>
+          <div class="form-field">
+            <label>Date de debut du contrat</label>
+            <input type="date" id="mc_date_debut">
+          </div>
+          <div class="form-field">
+            <label>Date de fin du contrat</label>
+            <input type="date" id="mc_date_fin">
+          </div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">📍 Adresse</div>
+        <div class="form-grid">
+          <div class="form-field full">
+            <label>Adresse <span class="req">*</span></label>
+            <input type="text" id="mc_adresse" placeholder="Ex: 5 avenue du General de Gaulle">
+          </div>
+          <div class="form-field">
+            <label>Complement d'adresse</label>
+            <input type="text" id="mc_complement" placeholder="Bat., etage...">
+          </div>
+          <div class="form-field">
+            <label>Commune <span class="req">*</span></label>
+            <input type="text" id="mc_commune" placeholder="Ex: Pamiers">
+          </div>
+          <div class="form-field">
+            <label>Code Postal <span class="req">*</span></label>
+            <input type="text" id="mc_cp" placeholder="Ex: 09100" maxlength="5">
+          </div>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="da-btn da-primary" onclick="addContractuel()">✓ Ajouter l'agent</button>
+        <button class="da-btn da-secondary" onclick="resetModalForm('contractuel')">↺ Reinitialiser</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════
+// STATE
+// ══════════════════════════════════════
+let fonctionnaires = [];
+let contractuels = [];
+let fileResults = [];
+let currentTab = 'fonc';
+let sortCol = -1, sortDir = 1;
+let projectInfo = { name: '', year: '' };
+let archivedProjects = JSON.parse(localStorage.getItem('deckod_archives') || '[]');
+
+// ══════════════════════════════════════
+// INIT
+// ══════════════════════════════════════
+renderArchiveList();
+
+// ══════════════════════════════════════
+// VIEW MANAGEMENT
+// ══════════════════════════════════════
+function switchView(viewId) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(viewId).classList.add('active');
+}
+
+// ══════════════════════════════════════
+// PROJECT CREATION
+// ══════════════════════════════════════
+function createProject() {
+  const name = document.getElementById('projectName').value.trim();
+  const year = document.getElementById('projectYear').value;
+  if (!name) {
+    document.getElementById('projectName').focus();
+    document.getElementById('projectName').style.borderColor = 'var(--red)';
+    setTimeout(() => document.getElementById('projectName').style.borderColor = '', 2000);
+    showToast('Veuillez saisir un nom de projet');
+    return;
+  }
+  projectInfo = { name, year };
+  document.getElementById('pbName').textContent = name;
+  document.getElementById('pbYear').textContent = `Annee ${year}`;
+
+  // Reset compiler state
+  fonctionnaires = []; contractuels = []; fileResults = [];
+  sortCol = -1; sortDir = 1; currentTab = 'fonc';
+  document.getElementById('dashboard').classList.remove('visible');
+  document.getElementById('fileList').classList.remove('visible');
+  document.getElementById('processing').classList.remove('visible');
+  document.getElementById('dropZone').style.display = '';
+  document.getElementById('btnAddMore').style.display = 'none';
+  document.getElementById('fileInput').value = '';
+  setPhase(1);
+
+  switchView('viewCompiler');
+  showToast(`Projet "${name}" cree`);
+}
+
+// ══════════════════════════════════════
+// DRAG & DROP + FILE INPUT
+// ══════════════════════════════════════
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+
+['dragenter','dragover'].forEach(e => dropZone.addEventListener(e, ev => { ev.preventDefault(); dropZone.classList.add('dragover'); }));
+['dragleave','drop'].forEach(e => dropZone.addEventListener(e, ev => { ev.preventDefault(); dropZone.classList.remove('dragover'); }));
+dropZone.addEventListener('click', e => { if(e.target.tagName !== 'BUTTON') fileInput.click(); });
+dropZone.addEventListener('drop', e => handleFiles(e.dataTransfer.files));
+fileInput.addEventListener('change', e => handleFiles(e.target.files));
+
+function addMoreFiles() {
+  // Show drop zone again to add more files
+  dropZone.style.display = '';
+  setPhase(1);
+  fileInput.value = '';
+  showToast('Glissez ou selectionnez des fichiers supplementaires');
+}
+
+async function handleFiles(fileListObj) {
+  const files = Array.from(fileListObj).filter(f => f.name.toLowerCase().endsWith('.xlsx') && !f.name.startsWith('~$'));
+  if (!files.length) { showToast('Aucun fichier .xlsx trouve'); return; }
+
+  // Don't reset data if adding more files
+  const isAdding = fonctionnaires.length > 0 || contractuels.length > 0;
+  if (!isAdding) {
+    fonctionnaires = []; contractuels = []; fileResults = [];
+    sortCol = -1; sortDir = 1;
+  }
+
+  setPhase(2);
+  document.getElementById('processing').classList.add('visible');
+  dropZone.style.display = 'none';
+
+  const total = files.length;
+  for (let i = 0; i < total; i++) {
+    document.getElementById('procText').textContent = 'Compilation en cours...';
+    document.getElementById('procDetail').textContent = `${i+1} / ${total} — ${files[i].name}`;
+    document.getElementById('procBar').style.width = `${((i+1)/total)*100}%`;
+
+    await processFile(files[i]);
+    if (i % 10 === 0) await new Promise(r => setTimeout(r, 0));
+  }
+
+  document.getElementById('processing').classList.remove('visible');
+  document.getElementById('fileList').classList.add('visible');
+  renderFileList();
+
+  setPhase(3);
+  buildDashboard();
+  document.getElementById('dashboard').classList.add('visible');
+  document.getElementById('btnAddMore').style.display = '';
+  showToast(`${total} fichier(s) compile(s) — ${fonctionnaires.length + contractuels.length} agents au total`);
+}
+
+function processFile(file) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const data = new Uint8Array(e.target.result);
+        const wb = XLSX.read(data, { type: 'array', cellDates: true });
+
+        const hasF1 = wb.SheetNames.includes('Feuillet 1 FONCTIONNAIRES STAGI');
+        const hasF2 = wb.SheetNames.includes('Feuillet 2 CONTRACTUELS');
+
+        if (!hasF1 && !hasF2) {
+          fileResults.push({ name: file.name, status: 'skip', fonc: 0, cont: 0 });
+          resolve(); return;
+        }
+
+        let cf = 0, cc = 0;
+
+        if (hasF1) {
+          const ws = wb.Sheets['Feuillet 1 FONCTIONNAIRES STAGI'];
+          const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+          for (let r = 1; r < rows.length; r++) {
+            const row = rows[r];
+            const nom = String(row[5] || '').trim();
+            const prenom = String(row[7] || '').trim();
+            const coll = String(row[9] || '').trim();
+            if (!nom && !prenom && !coll) continue;
+            fonctionnaires.push({
+              source: file.name, cst: fmt(row[0]), cap_a: fmt(row[1]), cap_b: fmt(row[2]), cap_c: fmt(row[3]),
+              titre: fmt(row[4]), nom: nom.toUpperCase(), nom_usage: fmt(row[6]), prenom: prenom,
+              dob: fmtDate(row[8]), collectivite: coll, categorie: fmt(row[10]),
+              qualite: fmt(row[11]), adresse: fmt(row[12]), complement: fmt(row[14]),
+              commune: fmt(row[15]).toUpperCase(), cp: fmt(row[16])
+            });
+            cf++;
+          }
+        }
+
+        if (hasF2) {
+          const ws = wb.Sheets['Feuillet 2 CONTRACTUELS'];
+          const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+          for (let r = 1; r < rows.length; r++) {
+            const row = rows[r];
+            const nom = String(row[3] || '').trim();
+            const prenom = String(row[5] || '').trim();
+            const coll = String(row[7] || '').trim();
+            if (!nom && !prenom && !coll) continue;
+            contractuels.push({
+              source: file.name, cst: fmt(row[0]), ccp: fmt(row[1]),
+              titre: fmt(row[2]), nom: nom.toUpperCase(), nom_usage: fmt(row[4]), prenom: prenom,
+              dob: fmtDate(row[6]), collectivite: coll, type_contrat: fmt(row[8]),
+              qualification: fmt(row[9]), date_debut: fmtDate(row[10]), date_fin: fmtDate(row[11]),
+              adresse: fmt(row[12]), complement: fmt(row[14]),
+              commune: fmt(row[15]).toUpperCase(), cp: fmt(row[16])
+            });
+            cc++;
+          }
+        }
+
+        fileResults.push({ name: file.name, status: 'ok', fonc: cf, cont: cc });
+      } catch(err) {
+        fileResults.push({ name: file.name, status: 'err', fonc: 0, cont: 0 });
+      }
+      resolve();
+    };
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+function fmt(v) { if (v === null || v === undefined) return ''; return String(v).trim(); }
+function fmtDate(v) {
+  if (!v) return '';
+  if (v instanceof Date) { const d=v.getDate(),m=v.getMonth()+1,y=v.getFullYear(); return `${d<10?'0'+d:d}/${m<10?'0'+m:m}/${y}`; }
+  return String(v).trim();
+}
+function formatDateInput(v) {
+  if (!v) return '';
+  const d = new Date(v);
+  return d.toLocaleDateString('fr-FR');
+}
+
+// ══════════════════════════════════════
+// PHASES
+// ══════════════════════════════════════
+function setPhase(n) {
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById('ph'+i);
+    el.classList.remove('active','done');
+    if (i < n) el.classList.add('done');
+    if (i === n) el.classList.add('active');
+  }
+}
+
+// ══════════════════════════════════════
+// FILE LIST
+// ══════════════════════════════════════
+function renderFileList() {
+  const ok = fileResults.filter(f=>f.status==='ok').length;
+  const err = fileResults.filter(f=>f.status==='err').length;
+  const skip = fileResults.filter(f=>f.status==='skip').length;
+  document.getElementById('flCount').textContent = `${ok} ok  ${err?err+' err  ':''}${skip?skip+' ignore':''}`;
+
+  document.getElementById('flGrid').innerHTML = fileResults.map(f => {
+    const cls = f.status === 'ok' ? 'fi-ok' : f.status === 'err' ? 'fi-err' : 'fi-skip';
+    const label = f.status === 'ok' ? `${f.fonc}F + ${f.cont}C` : f.status === 'err' ? 'Erreur' : 'Ignore';
+    return `<div class="fl-item"><span class="fi-icon">📄</span><span class="fi-name" title="${f.name}">${f.name}</span><span class="fi-status ${cls}">${label}</span></div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════
+// DASHBOARD
+// ══════════════════════════════════════
+function buildDashboard() {
+  const totalF = fonctionnaires.length;
+  const totalC = contractuels.length;
+  const totalAll = totalF + totalC;
+  const sources = new Set([...fonctionnaires.map(f=>f.source), ...contractuels.map(c=>c.source)]);
+
+  // Stat cards
+  document.getElementById('statRow').innerHTML = `
+    <div class="stat-card blue"><div class="sc-label">Total agents</div><div class="sc-value">${totalAll}</div><div class="sc-sub">${sources.size} sources</div></div>
+    <div class="stat-card green"><div class="sc-label">Fonctionnaires</div><div class="sc-value">${totalF}</div><div class="sc-sub">Titulaires & stagiaires</div></div>
+    <div class="stat-card orange"><div class="sc-label">Contractuels</div><div class="sc-value">${totalC}</div><div class="sc-sub">CDD & CDI</div></div>
+    <div class="stat-card violet"><div class="sc-label">Fichiers traites</div><div class="sc-value">${fileResults.length}</div><div class="sc-sub">${fileResults.filter(f=>f.status!=='ok').length} erreur(s)/ignore(s)</div></div>
+  `;
+
+  // Detail cards
+  const cstF = fonctionnaires.filter(f=>f.cst.toLowerCase()==='oui').length;
+  const cstC = contractuels.filter(c=>c.cst.toLowerCase()==='oui').length;
+  const capA = fonctionnaires.filter(f=>f.cap_a.toLowerCase()==='oui').length;
+  const capB = fonctionnaires.filter(f=>f.cap_b.toLowerCase()==='oui').length;
+  const capC = fonctionnaires.filter(f=>f.cap_c.toLowerCase()==='oui').length;
+  const ccp = contractuels.filter(c=>c.ccp.toLowerCase()==='oui').length;
+
+  const catA = fonctionnaires.filter(f=>f.categorie.toUpperCase().includes('A')).length;
+  const catB = fonctionnaires.filter(f=>f.categorie.toUpperCase().includes('B')).length;
+  const catC_count = fonctionnaires.filter(f=>f.categorie.toUpperCase().includes('C')).length;
+
+  const cdd = contractuels.filter(c=>c.type_contrat.toUpperCase()==='CDD').length;
+  const cdi = contractuels.filter(c=>c.type_contrat.toUpperCase()==='CDI').length;
+
+  const maxScrutin = Math.max(cstF+cstC, capA, capB, capC, ccp, 1);
+  const maxCat = Math.max(catA, catB, catC_count, 1);
+  const maxCont = Math.max(cdd, cdi, 1);
+
+  function bar(val, max, cls) { return `<div class="dc-bar"><div class="dc-bar-fill ${cls}" style="width:${(val/max)*100}%"></div></div>`; }
+
+  document.getElementById('detailGrid').innerHTML = `
+    <div class="detail-card">
+      <div class="dc-title">📊 Scrutins</div>
+      <div class="dc-row"><span class="dc-label">CST</span>${bar(cstF+cstC,maxScrutin,'bar-blue')}<span class="dc-val">${cstF+cstC}</span></div>
+      <div class="dc-row"><span class="dc-label">CAP A</span>${bar(capA,maxScrutin,'bar-violet')}<span class="dc-val">${capA}</span></div>
+      <div class="dc-row"><span class="dc-label">CAP B</span>${bar(capB,maxScrutin,'bar-orange')}<span class="dc-val">${capB}</span></div>
+      <div class="dc-row"><span class="dc-label">CAP C</span>${bar(capC,maxScrutin,'bar-amber')}<span class="dc-val">${capC}</span></div>
+      <div class="dc-row"><span class="dc-label">CCP</span>${bar(ccp,maxScrutin,'bar-green')}<span class="dc-val">${ccp}</span></div>
+    </div>
+    <div class="detail-card">
+      <div class="dc-title">📋 Repartition</div>
+      <div class="dc-row"><span class="dc-label">Categorie A</span>${bar(catA,maxCat,'bar-blue')}<span class="dc-val">${catA}</span></div>
+      <div class="dc-row"><span class="dc-label">Categorie B</span>${bar(catB,maxCat,'bar-violet')}<span class="dc-val">${catB}</span></div>
+      <div class="dc-row"><span class="dc-label">Categorie C</span>${bar(catC_count,maxCat,'bar-orange')}<span class="dc-val">${catC_count}</span></div>
+      <div style="border-top:1px solid var(--ink-05);margin:.5rem 0"></div>
+      <div class="dc-row"><span class="dc-label">CDD</span>${bar(cdd,maxCont,'bar-green')}<span class="dc-val">${cdd}</span></div>
+      <div class="dc-row"><span class="dc-label">CDI</span>${bar(cdi,maxCont,'bar-blue')}<span class="dc-val">${cdi}</span></div>
+    </div>
+  `;
+
+  // Tab counts
+  document.getElementById('tabCountF').textContent = totalF;
+  document.getElementById('tabCountC').textContent = totalC;
+
+  // Source filter
+  const sel = document.getElementById('filterSource');
+  sel.innerHTML = '<option value="">Toutes</option>' +
+    Array.from(sources).sort().map(s => `<option value="${s}">${s}</option>`).join('');
+
+  updateScrutinFilter();
+  renderTable();
+}
+
+function updateScrutinFilter() {
+  const sel = document.getElementById('filterScrutin');
+  if (currentTab === 'fonc') {
+    sel.innerHTML = '<option value="">Tous</option><option value="cst">CST = Oui</option><option value="cap_a">CAP A = Oui</option><option value="cap_b">CAP B = Oui</option><option value="cap_c">CAP C = Oui</option>';
+  } else {
+    sel.innerHTML = '<option value="">Tous</option><option value="cst">CST = Oui</option><option value="ccp">CCP = Oui</option>';
+  }
+}
+
+function onFilterTypeChange() {
+  switchTab(document.getElementById('filterType').value);
+}
+
+// ══════════════════════════════════════
+// TABLE RENDERING
+// ══════════════════════════════════════
+function switchTab(tab) {
+  currentTab = tab;
+  sortCol = -1; sortDir = 1;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-btn')[tab==='fonc'?0:1].classList.add('active');
+  document.getElementById('tsTitle').textContent = tab==='fonc' ? '🏛️ Fonctionnaires' : '📋 Contractuels';
+  document.getElementById('filterType').value = tab;
+  document.getElementById('filterSource').value = '';
+  document.getElementById('filterScrutin').value = '';
+  document.getElementById('filterCategorie').value = '';
+  updateScrutinFilter();
+  renderTable();
+}
+
+function tag(v) {
+  const lv = String(v).toLowerCase();
+  if (lv === 'oui') return '<span class="tag tag-oui">Oui</span>';
+  if (lv === 'non') return '<span class="tag tag-non">Non</span>';
+  return v;
+}
+
+function renderTable() {
+  const search = document.getElementById('globalSearch').value.toLowerCase();
+  const filterSrc = document.getElementById('filterSource').value;
+  const filterScr = document.getElementById('filterScrutin').value;
+  const filterCat = document.getElementById('filterCategorie').value;
+
+  let data, headers, rowFn;
+
+  if (currentTab === 'fonc') {
+    data = [...fonctionnaires];
+    headers = ['Source','CST','CAP A','CAP B','CAP C','Nom','Prenom','Naissance','Collectivite','Cat.','Qualite','Commune','CP'];
+    rowFn = f => [f.source, f.cst, f.cap_a, f.cap_b, f.cap_c, f.nom, f.prenom, f.dob, f.collectivite, f.categorie, f.qualite, f.commune, f.cp];
+  } else {
+    data = [...contractuels];
+    headers = ['Source','CST','CCP','Nom','Prenom','Naissance','Collectivite','Contrat','Qualif.','Debut','Fin','Commune','CP'];
+    rowFn = c => [c.source, c.cst, c.ccp, c.nom, c.prenom, c.dob, c.collectivite, c.type_contrat, c.qualification, c.date_debut, c.date_fin, c.commune, c.cp];
+  }
+
+  // Filters
+  if (filterSrc) data = data.filter(d => d.source === filterSrc);
+  if (filterScr) data = data.filter(d => String(d[filterScr] || '').toLowerCase() === 'oui');
+  if (filterCat && currentTab === 'fonc') data = data.filter(d => d.categorie.toUpperCase() === filterCat);
+  if (search) data = data.filter(d => {
+    const vals = Object.values(d).join(' ').toLowerCase();
+    return vals.includes(search);
+  });
+
+  // Sort
+  if (sortCol >= 0) {
+    const keys = currentTab === 'fonc'
+      ? ['source','cst','cap_a','cap_b','cap_c','nom','prenom','dob','collectivite','categorie','qualite','commune','cp']
+      : ['source','cst','ccp','nom','prenom','dob','collectivite','type_contrat','qualification','date_debut','date_fin','commune','cp'];
+    const key = keys[sortCol];
+    data.sort((a,b) => {
+      const va = String(a[key]||'').toLowerCase(), vb = String(b[key]||'').toLowerCase();
+      return va < vb ? -sortDir : va > vb ? sortDir : 0;
+    });
+  }
+
+  // Result count
+  document.getElementById('resultCount').textContent = `${data.length} resultat(s)`;
+
+  const wrap = document.getElementById('tableWrap');
+  if (!data.length) {
+    wrap.innerHTML = '<div class="empty-state">Aucun resultat</div>';
+    return;
+  }
+
+  let html = '<table><thead><tr>';
+  headers.forEach((h, i) => {
+    const cls = sortCol === i ? (sortDir === 1 ? 'sorted-asc' : 'sorted-desc') : '';
+    html += `<th class="${cls}" onclick="sortTable(${i})">${h}</th>`;
+  });
+  html += '</tr></thead><tbody>';
+
+  data.forEach(d => {
+    const vals = rowFn(d);
+    html += '<tr>' + vals.map((v, i) => {
+      if ((currentTab==='fonc' && i>=1 && i<=4) || (currentTab==='cont' && i>=1 && i<=2)) return `<td>${tag(v)}</td>`;
+      if (i === (currentTab==='fonc'?5:3)) return `<td><strong>${v}</strong></td>`;
+      return `<td>${v}</td>`;
+    }).join('') + '</tr>';
+  });
+
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+}
+
+function sortTable(col) {
+  if (sortCol === col) sortDir *= -1;
+  else { sortCol = col; sortDir = 1; }
+  renderTable();
+}
+
+// ══════════════════════════════════════
+// EXPORT XLSX (format strict)
+// ══════════════════════════════════════
+function exportXLSX() {
+  setPhase(4);
+  const wb = XLSX.utils.book_new();
+
+  // ── Feuillet 1 FONCTIONNAIRES STAGI ──
+  // Headers matching exact original format
+  const fHeaders = ['CST','CAP A','CAP B','CAP C','Titre','Nom de naissance','Nom d\'usage','Prenom',
+    'Date de naissance','Collectivite / Etablissement','Categorie (A/B/C)',
+    'Qualite (Titulaire/Stagiaire)','Adresse','','Complement d\'adresse','Commune','Code Postal'];
+  const fData = fonctionnaires.map(f => [
+    f.cst, f.cap_a, f.cap_b, f.cap_c, f.titre, f.nom, f.nom_usage, f.prenom,
+    f.dob, f.collectivite, f.categorie, f.qualite, f.adresse, '', f.complement, f.commune, f.cp
+  ]);
+  const ws1 = XLSX.utils.aoa_to_sheet([fHeaders, ...fData]);
+
+  // Column widths matching original format
+  ws1['!cols'] = [
+    {wch:6},{wch:6},{wch:6},{wch:6},{wch:10},{wch:20},{wch:18},{wch:15},
+    {wch:14},{wch:30},{wch:14},{wch:22},{wch:30},{wch:2},{wch:20},{wch:18},{wch:10}
+  ];
+
+  // Style header row
+  const fRange = XLSX.utils.decode_range(ws1['!ref']);
+  for (let c = fRange.s.c; c <= fRange.e.c; c++) {
+    const addr = XLSX.utils.encode_cell({r:0,c});
+    if (ws1[addr]) {
+      ws1[addr].s = {
+        font: {bold: true, color: {rgb: 'FFFFFF'}, sz: 10},
+        fill: {fgColor: {rgb: '2E5090'}},
+        alignment: {horizontal: 'center', vertical: 'center', wrapText: true},
+        border: {
+          top: {style:'thin',color:{rgb:'000000'}},
+          bottom: {style:'thin',color:{rgb:'000000'}},
+          left: {style:'thin',color:{rgb:'000000'}},
+          right: {style:'thin',color:{rgb:'000000'}}
+        }
+      };
+    }
+  }
+
+  // Style data cells
+  for (let r = 1; r <= fData.length; r++) {
+    for (let c = fRange.s.c; c <= fRange.e.c; c++) {
+      const addr = XLSX.utils.encode_cell({r,c});
+      if (ws1[addr]) {
+        ws1[addr].s = {
+          font: {sz: 10},
+          alignment: {vertical: 'center'},
+          border: {
+            top: {style:'thin',color:{rgb:'D9D9D9'}},
+            bottom: {style:'thin',color:{rgb:'D9D9D9'}},
+            left: {style:'thin',color:{rgb:'D9D9D9'}},
+            right: {style:'thin',color:{rgb:'D9D9D9'}}
+          }
+        };
+        // Center scrutin columns
+        if (c <= 3) ws1[addr].s.alignment = {horizontal: 'center', vertical: 'center'};
+      }
+    }
+  }
+
+  ws1['!autofilter'] = { ref: `A1:Q${fData.length+1}` };
+  XLSX.utils.book_append_sheet(wb, ws1, 'Feuillet 1 FONCTIONNAIRES STAGI');
+
+  // ── Feuillet 2 CONTRACTUELS ──
+  const cHeaders = ['CST','CCP','Titre','Nom de naissance','Nom d\'usage','Prenom',
+    'Date de naissance','Collectivite / Etablissement','Type contrat (CDD/CDI)',
+    'Qualification (Prive/Public)','Date debut contrat','Date fin contrat',
+    'Adresse','','Complement d\'adresse','Commune','Code Postal'];
+  const cData = contractuels.map(c => [
+    c.cst, c.ccp, c.titre, c.nom, c.nom_usage, c.prenom,
+    c.dob, c.collectivite, c.type_contrat, c.qualification,
+    c.date_debut, c.date_fin, c.adresse, '', c.complement, c.commune, c.cp
+  ]);
+  const ws2 = XLSX.utils.aoa_to_sheet([cHeaders, ...cData]);
+
+  ws2['!cols'] = [
+    {wch:6},{wch:6},{wch:10},{wch:20},{wch:18},{wch:15},{wch:14},{wch:30},
+    {wch:16},{wch:18},{wch:14},{wch:14},{wch:30},{wch:2},{wch:20},{wch:18},{wch:10}
+  ];
+
+  // Style header row
+  const cRange = XLSX.utils.decode_range(ws2['!ref']);
+  for (let c = cRange.s.c; c <= cRange.e.c; c++) {
+    const addr = XLSX.utils.encode_cell({r:0,c});
+    if (ws2[addr]) {
+      ws2[addr].s = {
+        font: {bold: true, color: {rgb: 'FFFFFF'}, sz: 10},
+        fill: {fgColor: {rgb: '548235'}},
+        alignment: {horizontal: 'center', vertical: 'center', wrapText: true},
+        border: {
+          top: {style:'thin',color:{rgb:'000000'}},
+          bottom: {style:'thin',color:{rgb:'000000'}},
+          left: {style:'thin',color:{rgb:'000000'}},
+          right: {style:'thin',color:{rgb:'000000'}}
+        }
+      };
+    }
+  }
+
+  for (let r = 1; r <= cData.length; r++) {
+    for (let c = cRange.s.c; c <= cRange.e.c; c++) {
+      const addr = XLSX.utils.encode_cell({r,c});
+      if (ws2[addr]) {
+        ws2[addr].s = {
+          font: {sz: 10},
+          alignment: {vertical: 'center'},
+          border: {
+            top: {style:'thin',color:{rgb:'D9D9D9'}},
+            bottom: {style:'thin',color:{rgb:'D9D9D9'}},
+            left: {style:'thin',color:{rgb:'D9D9D9'}},
+            right: {style:'thin',color:{rgb:'D9D9D9'}}
+          }
+        };
+        if (c <= 1) ws2[addr].s.alignment = {horizontal: 'center', vertical: 'center'};
+      }
+    }
+  }
+
+  ws2['!autofilter'] = { ref: `A1:Q${cData.length+1}` };
+  XLSX.utils.book_append_sheet(wb, ws2, 'Feuillet 2 CONTRACTUELS');
+
+  // ── Tableau de bord ──
+  const cstFonc = fonctionnaires.filter(f=>f.cst.toLowerCase()==='oui').length;
+  const cstCont = contractuels.filter(c=>c.cst.toLowerCase()==='oui').length;
+  const tbData = [
+    [`TABLEAU DE BORD — ${projectInfo.name} — Elections Professionnelles ${projectInfo.year}`],
+    [],
+    ['SYNTHESE','','',''],
+    ['Total Fonctionnaires', fonctionnaires.length, '', ''],
+    ['Total Contractuels', contractuels.length, '', ''],
+    ['Total Agents', fonctionnaires.length + contractuels.length, '', ''],
+    ['Fichiers traites', fileResults.length, '', ''],
+    [],
+    ['SCRUTINS','Fonctionnaires','Contractuels','Total'],
+    ['CST', cstFonc, cstCont, cstFonc + cstCont],
+    ['CAP A', fonctionnaires.filter(f=>f.cap_a.toLowerCase()==='oui').length, '—', ''],
+    ['CAP B', fonctionnaires.filter(f=>f.cap_b.toLowerCase()==='oui').length, '—', ''],
+    ['CAP C', fonctionnaires.filter(f=>f.cap_c.toLowerCase()==='oui').length, '—', ''],
+    ['CCP', '—', contractuels.filter(c=>c.ccp.toLowerCase()==='oui').length, ''],
+    [],
+    ['CATEGORIES','Nombre','',''],
+    ['Categorie A', fonctionnaires.filter(f=>f.categorie.toUpperCase().includes('A')).length],
+    ['Categorie B', fonctionnaires.filter(f=>f.categorie.toUpperCase().includes('B')).length],
+    ['Categorie C', fonctionnaires.filter(f=>f.categorie.toUpperCase().includes('C')).length],
+    [],
+    ['TYPE CONTRAT','Nombre','',''],
+    ['CDD', contractuels.filter(c=>c.type_contrat.toUpperCase()==='CDD').length],
+    ['CDI', contractuels.filter(c=>c.type_contrat.toUpperCase()==='CDI').length],
+  ];
+
+  const ws3 = XLSX.utils.aoa_to_sheet(tbData);
+  ws3['!cols'] = [{ wch: 30 }, { wch: 16 }, { wch: 16 }, { wch: 12 }];
+  XLSX.utils.book_append_sheet(wb, ws3, 'Tableau de bord');
+
+  const fileName = `${projectInfo.name.replace(/[^a-zA-Z0-9]/g,'_')}_${projectInfo.year}_COMPILE.xlsx`;
+  XLSX.writeFile(wb, fileName);
+  showToast(`📥 ${fileName} telecharge !`);
+}
+
+// ══════════════════════════════════════
+// GOOGLE DRIVE EXPORT
+// ══════════════════════════════════════
+function exportToGoogleDrive() {
+  // Generate the Excel file as blob
+  const wb = buildExportWorkbook();
+  const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+  const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  const fileName = `${projectInfo.name.replace(/[^a-zA-Z0-9]/g,'_')}_${projectInfo.year}_COMPILE.xlsx`;
+
+  // First download the file locally
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  a.click();
+  URL.revokeObjectURL(url);
+
+  // Then open Google Drive upload page
+  setTimeout(() => {
+    window.open('https://drive.google.com/drive/my-drive', '_blank');
+    showToast('Fichier telecharge. Importez-le dans Google Drive via la page ouverte.');
+  }, 500);
+}
+
+function buildExportWorkbook() {
+  const wb = XLSX.utils.book_new();
+
+  const fHeaders = ['CST','CAP A','CAP B','CAP C','Titre','Nom de naissance','Nom d\'usage','Prenom',
+    'Date de naissance','Collectivite / Etablissement','Categorie (A/B/C)',
+    'Qualite (Titulaire/Stagiaire)','Adresse','','Complement d\'adresse','Commune','Code Postal'];
+  const fData = fonctionnaires.map(f => [
+    f.cst, f.cap_a, f.cap_b, f.cap_c, f.titre, f.nom, f.nom_usage, f.prenom,
+    f.dob, f.collectivite, f.categorie, f.qualite, f.adresse, '', f.complement, f.commune, f.cp
+  ]);
+  const ws1 = XLSX.utils.aoa_to_sheet([fHeaders, ...fData]);
+  ws1['!cols'] = [{wch:6},{wch:6},{wch:6},{wch:6},{wch:10},{wch:20},{wch:18},{wch:15},
+    {wch:14},{wch:30},{wch:14},{wch:22},{wch:30},{wch:2},{wch:20},{wch:18},{wch:10}];
+  ws1['!autofilter'] = { ref: `A1:Q${fData.length+1}` };
+  XLSX.utils.book_append_sheet(wb, ws1, 'Feuillet 1 FONCTIONNAIRES STAGI');
+
+  const cHeaders = ['CST','CCP','Titre','Nom de naissance','Nom d\'usage','Prenom',
+    'Date de naissance','Collectivite / Etablissement','Type contrat (CDD/CDI)',
+    'Qualification (Prive/Public)','Date debut contrat','Date fin contrat',
+    'Adresse','','Complement d\'adresse','Commune','Code Postal'];
+  const cData = contractuels.map(c => [
+    c.cst, c.ccp, c.titre, c.nom, c.nom_usage, c.prenom,
+    c.dob, c.collectivite, c.type_contrat, c.qualification,
+    c.date_debut, c.date_fin, c.adresse, '', c.complement, c.commune, c.cp
+  ]);
+  const ws2 = XLSX.utils.aoa_to_sheet([cHeaders, ...cData]);
+  ws2['!cols'] = [{wch:6},{wch:6},{wch:10},{wch:20},{wch:18},{wch:15},{wch:14},{wch:30},
+    {wch:16},{wch:18},{wch:14},{wch:14},{wch:30},{wch:2},{wch:20},{wch:18},{wch:10}];
+  ws2['!autofilter'] = { ref: `A1:Q${cData.length+1}` };
+  XLSX.utils.book_append_sheet(wb, ws2, 'Feuillet 2 CONTRACTUELS');
+
+  const cstFonc = fonctionnaires.filter(f=>f.cst.toLowerCase()==='oui').length;
+  const cstCont = contractuels.filter(c=>c.cst.toLowerCase()==='oui').length;
+  const tbData = [
+    [`TABLEAU DE BORD — ${projectInfo.name} — Elections Professionnelles ${projectInfo.year}`],
+    [],
+    ['SYNTHESE','','',''],
+    ['Total Fonctionnaires', fonctionnaires.length],
+    ['Total Contractuels', contractuels.length],
+    ['Total Agents', fonctionnaires.length + contractuels.length],
+    ['Fichiers traites', fileResults.length],
+    [],
+    ['SCRUTINS','Fonctionnaires','Contractuels','Total'],
+    ['CST', cstFonc, cstCont, cstFonc+cstCont],
+    ['CAP A', fonctionnaires.filter(f=>f.cap_a.toLowerCase()==='oui').length, '—'],
+    ['CAP B', fonctionnaires.filter(f=>f.cap_b.toLowerCase()==='oui').length, '—'],
+    ['CAP C', fonctionnaires.filter(f=>f.cap_c.toLowerCase()==='oui').length, '—'],
+    ['CCP', '—', contractuels.filter(c=>c.ccp.toLowerCase()==='oui').length],
+  ];
+  const ws3 = XLSX.utils.aoa_to_sheet(tbData);
+  ws3['!cols'] = [{wch:30},{wch:16},{wch:16},{wch:12}];
+  XLSX.utils.book_append_sheet(wb, ws3, 'Tableau de bord');
+
+  return wb;
+}
+
+// ══════════════════════════════════════
+// ARCHIVE / SAVE
+// ══════════════════════════════════════
+function archiveProject() {
+  if (!fonctionnaires.length && !contractuels.length) {
+    showToast('Aucune donnee a archiver');
+    return;
+  }
+
+  const archive = {
+    id: Date.now(),
+    name: projectInfo.name,
+    year: projectInfo.year,
+    date: new Date().toLocaleDateString('fr-FR'),
+    fonctionnaires: [...fonctionnaires],
+    contractuels: [...contractuels],
+    fileResults: [...fileResults],
+    totalAgents: fonctionnaires.length + contractuels.length
+  };
+
+  // Check if project already archived (update it)
+  const existingIdx = archivedProjects.findIndex(a => a.name === projectInfo.name && a.year === projectInfo.year);
+  if (existingIdx >= 0) {
+    archivedProjects[existingIdx] = archive;
+    showToast(`Projet "${projectInfo.name}" mis a jour dans les archives`);
+  } else {
+    archivedProjects.push(archive);
+    showToast(`Projet "${projectInfo.name}" archive avec succes`);
+  }
+
+  localStorage.setItem('deckod_archives', JSON.stringify(archivedProjects));
+  renderArchiveList();
+}
+
+function loadArchive(id) {
+  const archive = archivedProjects.find(a => a.id === id);
+  if (!archive) return;
+
+  projectInfo = { name: archive.name, year: archive.year };
+  fonctionnaires = [...archive.fonctionnaires];
+  contractuels = [...archive.contractuels];
+  fileResults = [...archive.fileResults];
+  sortCol = -1; sortDir = 1; currentTab = 'fonc';
+
+  document.getElementById('pbName').textContent = archive.name;
+  document.getElementById('pbYear').textContent = `Annee ${archive.year}`;
+
+  switchView('viewCompiler');
+  dropZone.style.display = 'none';
+  document.getElementById('btnAddMore').style.display = '';
+  document.getElementById('fileList').classList.add('visible');
+  renderFileList();
+  setPhase(3);
+  buildDashboard();
+  document.getElementById('dashboard').classList.add('visible');
+  showToast(`Projet "${archive.name}" charge depuis les archives`);
+}
+
+function deleteArchive(id, ev) {
+  ev.stopPropagation();
+  if (!confirm('Supprimer ce projet archive ?')) return;
+  archivedProjects = archivedProjects.filter(a => a.id !== id);
+  localStorage.setItem('deckod_archives', JSON.stringify(archivedProjects));
+  renderArchiveList();
+  showToast('Archive supprimee');
+}
+
+function renderArchiveList() {
+  const section = document.getElementById('archiveSection');
+  const list = document.getElementById('archiveList');
+
+  if (!archivedProjects.length) {
+    section.style.display = 'none';
+    return;
+  }
+
+  section.style.display = '';
+  list.innerHTML = archivedProjects.map(a => `
+    <div class="archive-item" onclick="loadArchive(${a.id})">
+      <span style="font-size:1.2rem">📁</span>
+      <span class="ai-name">${a.name}</span>
+      <span class="ai-date">${a.year} — ${a.date}</span>
+      <span class="ai-count">${a.totalAgents} agents</span>
+      <button class="ai-delete" onclick="deleteArchive(${a.id}, event)" title="Supprimer">✕</button>
+    </div>
+  `).join('');
+}
+
+// ══════════════════════════════════════
+// RESET COMPILER
+// ══════════════════════════════════════
+function resetCompiler() {
+  fonctionnaires = []; contractuels = []; fileResults = [];
+  sortCol = -1; sortDir = 1; currentTab = 'fonc';
+  document.getElementById('dashboard').classList.remove('visible');
+  document.getElementById('fileList').classList.remove('visible');
+  document.getElementById('processing').classList.remove('visible');
+  document.getElementById('btnAddMore').style.display = 'none';
+  dropZone.style.display = '';
+  fileInput.value = '';
+  setPhase(1);
+}
+
+// ══════════════════════════════════════
+// MODAL FORM
+// ══════════════════════════════════════
+function openFormModal() {
+  document.getElementById('formModal').classList.add('visible');
+  document.getElementById('navFormBtn').classList.add('active');
+}
+function closeFormModal() {
+  document.getElementById('formModal').classList.remove('visible');
+  document.getElementById('navFormBtn').classList.remove('active');
+}
+
+function selectFormType(type) {
+  document.querySelectorAll('.form-type-card').forEach(c => c.classList.remove('active'));
+  document.querySelector(`.form-type-card[data-type="${type}"]`).classList.add('active');
+  document.getElementById('modalFormFonc').style.display = type === 'fonctionnaire' ? '' : 'none';
+  document.getElementById('modalFormCont').style.display = type === 'contractuel' ? '' : 'none';
+}
+
+// ══════════════════════════════════════
+// TOGGLE & VALIDATION HELPERS
+// ══════════════════════════════════════
+function toggleBtn(btn) { btn.classList.toggle('on'); }
+function getToggle(id) { return document.getElementById(id).classList.contains('on') ? 'Oui' : 'Non'; }
+function val(id) { return document.getElementById(id).value.trim(); }
+
+function requireFields(ids) {
+  for (const id of ids) {
+    if (!val(id)) {
+      document.getElementById(id).focus();
+      document.getElementById(id).style.borderColor = 'var(--red)';
+      setTimeout(() => document.getElementById(id).style.borderColor = '', 2000);
+      showToast('Veuillez remplir tous les champs obligatoires');
+      return false;
+    }
+  }
+  return true;
+}
+
+// ══════════════════════════════════════
+// ADD FROM FORM
+// ══════════════════════════════════════
+function addFonctionnaire() {
+  if (!requireFields(['mf_nom','mf_prenom','mf_dob','mf_collectivite','mf_categorie','mf_qualite','mf_adresse','mf_commune','mf_cp'])) return;
+  fonctionnaires.push({
+    source: 'Saisie manuelle',
+    cst: getToggle('mf_cst'),
+    cap_a: getToggle('mf_cap_a'),
+    cap_b: getToggle('mf_cap_b'),
+    cap_c: getToggle('mf_cap_c'),
+    titre: val('mf_titre'),
+    nom: val('mf_nom').toUpperCase(),
+    nom_usage: val('mf_nom_usage'),
+    prenom: val('mf_prenom'),
+    dob: formatDateInput(val('mf_dob')),
+    collectivite: val('mf_collectivite'),
+    categorie: val('mf_categorie'),
+    qualite: val('mf_qualite'),
+    adresse: val('mf_adresse'),
+    complement: val('mf_complement'),
+    commune: val('mf_commune').toUpperCase(),
+    cp: val('mf_cp')
+  });
+  resetModalForm('fonctionnaire');
+  showToast('Fonctionnaire ajoute');
+
+  // Refresh dashboard if visible
+  if (document.getElementById('dashboard').classList.contains('visible')) {
+    buildDashboard();
+  }
+}
+
+function addContractuel() {
+  if (!requireFields(['mc_nom','mc_prenom','mc_dob','mc_collectivite','mc_type_contrat','mc_qualification','mc_adresse','mc_commune','mc_cp'])) return;
+  contractuels.push({
+    source: 'Saisie manuelle',
+    cst: getToggle('mc_cst'),
+    ccp: getToggle('mc_ccp'),
+    titre: val('mc_titre'),
+    nom: val('mc_nom').toUpperCase(),
+    nom_usage: val('mc_nom_usage'),
+    prenom: val('mc_prenom'),
+    dob: formatDateInput(val('mc_dob')),
+    collectivite: val('mc_collectivite'),
+    type_contrat: val('mc_type_contrat'),
+    qualification: val('mc_qualification'),
+    date_debut: formatDateInput(val('mc_date_debut')),
+    date_fin: formatDateInput(val('mc_date_fin')),
+    adresse: val('mc_adresse'),
+    complement: val('mc_complement'),
+    commune: val('mc_commune').toUpperCase(),
+    cp: val('mc_cp')
+  });
+  resetModalForm('contractuel');
+  showToast('Contractuel ajoute');
+
+  if (document.getElementById('dashboard').classList.contains('visible')) {
+    buildDashboard();
+  }
+}
+
+function resetModalForm(type) {
+  if (type === 'fonctionnaire') {
+    ['mf_titre','mf_nom','mf_nom_usage','mf_prenom','mf_dob','mf_collectivite','mf_categorie','mf_qualite','mf_adresse','mf_complement','mf_commune','mf_cp'].forEach(id => document.getElementById(id).value = '');
+    ['mf_cst','mf_cap_a','mf_cap_b','mf_cap_c'].forEach(id => document.getElementById(id).classList.remove('on'));
+  } else {
+    ['mc_titre','mc_nom','mc_nom_usage','mc_prenom','mc_dob','mc_collectivite','mc_type_contrat','mc_qualification','mc_date_debut','mc_date_fin','mc_adresse','mc_complement','mc_commune','mc_cp'].forEach(id => document.getElementById(id).value = '');
+    ['mc_cst','mc_ccp'].forEach(id => document.getElementById(id).classList.remove('on'));
+  }
+}
+
+// Close modal on overlay click
+document.getElementById('formModal').addEventListener('click', function(e) {
+  if (e.target === this) closeFormModal();
+});
+
+// ══════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+</script>
+</body>
+</html>

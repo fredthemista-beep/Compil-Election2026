@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Compilateur — Élections Professionnelles 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Fraunces:ital,wght@0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root {
+  --ink: #0c1222;
+  --ink-80: #1e2a3f;
+  --ink-60: #334155;
+  --ink-40: #64748b;
+  --ink-20: #94a3b8;
+  --ink-10: #cbd5e1;
+  --ink-05: #e2e8f0;
+  --ink-02: #f1f5f9;
+  --paper: #f8fafc;
+  --white: #ffffff;
+  --blue: #2563eb;
+  --blue-d: #1d4ed8;
+  --blue-l: #dbeafe;
+  --blue-xl: #eff6ff;
+  --green: #16a34a;
+  --green-l: #dcfce7;
+  --orange: #ea580c;
+  --orange-l: #fff7ed;
+  --red: #dc2626;
+  --red-l: #fef2f2;
+  --amber: #d97706;
+  --amber-l: #fffbeb;
+  --violet: #7c3aed;
+  --violet-l: #f5f3ff;
+  --radius: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --shadow-1: 0 1px 3px rgba(12,18,34,.06), 0 1px 2px rgba(12,18,34,.04);
+  --shadow-2: 0 4px 14px rgba(12,18,34,.08);
+  --shadow-3: 0 12px 40px rgba(12,18,34,.12);
+  --shadow-4: 0 24px 60px rgba(12,18,34,.16);
+  --ease: cubic-bezier(.4,0,.2,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Outfit',sans-serif;background:var(--paper);color:var(--ink-60);min-height:100vh;-webkit-font-smoothing:antialiased}
+
+/* ═══ HEADER ═══ */
+.header{background:var(--ink);position:relative;overflow:hidden}
+.header::before{content:'';position:absolute;inset:0;background:
+  radial-gradient(ellipse 80% 60% at 20% 100%, rgba(37,99,235,.15) 0%, transparent 70%),
+  radial-gradient(ellipse 60% 50% at 80% 0%, rgba(124,58,237,.1) 0%, transparent 70%);
+  pointer-events:none}
+.header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.1) 20%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.1) 80%,transparent)}
+.header-inner{max-width:1100px;margin:0 auto;padding:2.5rem 2rem 2rem;position:relative;z-index:1}
+.header h1{font-family:'Fraunces',serif;font-weight:900;font-size:clamp(1.8rem,4.5vw,2.6rem);
+  color:#fff;letter-spacing:-.03em;line-height:1.15}
+.header h1 span{background:linear-gradient(135deg,#60a5fa,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header-sub{color:var(--ink-20);font-size:.95rem;margin-top:.5rem;font-weight:300;letter-spacing:.01em}
+.header-badges{display:flex;gap:.5rem;margin-top:1rem;flex-wrap:wrap}
+.hbadge{padding:.3rem .7rem;border-radius:50px;font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.6);backdrop-filter:blur(4px)}
+
+/* ═══ MAIN LAYOUT ═══ */
+.main{max-width:1100px;margin:0 auto;padding:2rem 2rem 4rem}
+
+/* ═══ PHASE INDICATOR ═══ */
+.phases{display:flex;gap:0;margin-bottom:2rem;background:var(--white);border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-1);overflow:hidden;border:1px solid var(--ink-05)}
+.phase{flex:1;padding:1rem;text-align:center;position:relative;cursor:default;transition:.3s var(--ease)}
+.phase:not(:last-child)::after{content:'';position:absolute;right:0;top:20%;height:60%;width:1px;background:var(--ink-05)}
+.phase .pnum{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;
+  background:var(--ink-05);color:var(--ink-40);font-weight:700;font-size:.8rem;margin-bottom:.35rem;transition:.3s var(--ease)}
+.phase .plabel{font-size:.78rem;font-weight:600;color:var(--ink-20);text-transform:uppercase;letter-spacing:.05em;transition:.3s var(--ease)}
+.phase.active .pnum{background:var(--blue);color:#fff;box-shadow:0 0 0 4px rgba(37,99,235,.15)}
+.phase.active .plabel{color:var(--ink)}
+.phase.done .pnum{background:var(--green);color:#fff}
+.phase.done .plabel{color:var(--green)}
+
+/* ═══ DROP ZONE ═══ */
+.drop-zone{
+  background:var(--white);border:2px dashed var(--ink-10);border-radius:var(--radius-xl);
+  padding:3.5rem 2rem;text-align:center;cursor:pointer;transition:.3s var(--ease);
+  position:relative;overflow:hidden;
+}
+.drop-zone::before{content:'';position:absolute;inset:0;background:
+  repeating-linear-gradient(45deg,transparent,transparent 10px,rgba(37,99,235,.015) 10px,rgba(37,99,235,.015) 20px);
+  pointer-events:none;opacity:0;transition:.3s var(--ease)}
+.drop-zone:hover,.drop-zone.dragover{border-color:var(--blue);background:var(--blue-xl);transform:scale(1.005)}
+.drop-zone:hover::before,.drop-zone.dragover::before{opacity:1}
+.drop-zone.dragover{border-style:solid;box-shadow:0 0 0 4px rgba(37,99,235,.1)}
+.dz-icon{font-size:3rem;margin-bottom:.75rem;filter:grayscale(.3);transition:.3s var(--ease)}
+.drop-zone:hover .dz-icon,.drop-zone.dragover .dz-icon{filter:grayscale(0);transform:scale(1.1)}
+.dz-title{font-family:'Fraunces',serif;font-weight:800;font-size:1.3rem;color:var(--ink);margin-bottom:.35rem}
+.dz-sub{color:var(--ink-40);font-size:.88rem}
+.dz-sub b{color:var(--blue);font-weight:600}
+.dz-btn{display:inline-flex;align-items:center;gap:.4rem;margin-top:1.25rem;padding:.65rem 1.5rem;
+  background:var(--blue);color:#fff;border:none;border-radius:var(--radius);font-family:'Outfit';
+  font-weight:600;font-size:.88rem;cursor:pointer;transition:.25s var(--ease)}
+.dz-btn:hover{background:var(--blue-d);transform:translateY(-1px);box-shadow:var(--shadow-2)}
+#fileInput{display:none}
+
+/* ═══ PROCESSING ═══ */
+.processing{display:none;text-align:center;padding:3rem 2rem}
+.processing.visible{display:block;animation:fadeIn .4s var(--ease)}
+.proc-spinner{width:48px;height:48px;border:3px solid var(--ink-05);border-top-color:var(--blue);border-radius:50%;
+  animation:spin .8s linear infinite;margin:0 auto 1rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+.proc-text{font-weight:600;color:var(--ink);font-size:1rem}
+.proc-detail{color:var(--ink-40);font-size:.85rem;margin-top:.25rem}
+.proc-bar-bg{width:100%;max-width:400px;height:6px;background:var(--ink-05);border-radius:3px;margin:1rem auto 0;overflow:hidden}
+.proc-bar{height:100%;background:linear-gradient(90deg,var(--blue),var(--violet));border-radius:3px;transition:width .3s var(--ease);width:0}
+
+/* ═══ FILE LIST ═══ */
+.file-list{margin-top:1.5rem;display:none}
+.file-list.visible{display:block;animation:fadeIn .3s var(--ease)}
+.fl-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem}
+.fl-title{font-weight:700;color:var(--ink);font-size:1rem}
+.fl-count{font-size:.8rem;color:var(--ink-40);background:var(--ink-02);padding:.25rem .6rem;border-radius:50px}
+.fl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.5rem;max-height:240px;overflow-y:auto;
+  padding-right:.5rem}
+.fl-grid::-webkit-scrollbar{width:4px}
+.fl-grid::-webkit-scrollbar-thumb{background:var(--ink-10);border-radius:2px}
+.fl-item{display:flex;align-items:center;gap:.5rem;padding:.5rem .7rem;background:var(--white);
+  border:1px solid var(--ink-05);border-radius:var(--radius);font-size:.8rem;transition:.2s var(--ease)}
+.fl-item:hover{border-color:var(--ink-10);box-shadow:var(--shadow-1)}
+.fl-item .fi-icon{font-size:1.1rem}
+.fl-item .fi-name{flex:1;color:var(--ink-60);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fl-item .fi-status{font-size:.7rem;font-weight:700;padding:.15rem .4rem;border-radius:50px}
+.fi-ok{background:var(--green-l);color:var(--green)}
+.fi-err{background:var(--red-l);color:var(--red)}
+.fi-skip{background:var(--amber-l);color:var(--amber)}
+
+/* ═══ DASHBOARD ═══ */
+.dashboard{display:none;margin-top:2rem}
+.dashboard.visible{display:block;animation:fadeIn .5s var(--ease)}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+.dash-actions{display:flex;gap:.75rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.da-btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.2rem;border-radius:var(--radius);
+  font-family:'Outfit';font-weight:600;font-size:.85rem;cursor:pointer;transition:.25s var(--ease);border:none}
+.da-primary{background:var(--green);color:#fff;box-shadow:0 4px 14px rgba(22,163,74,.25)}
+.da-primary:hover{background:#15803d;transform:translateY(-1px);box-shadow:0 6px 20px rgba(22,163,74,.35)}
+.da-secondary{background:var(--white);color:var(--ink);border:1.5px solid var(--ink-05)}
+.da-secondary:hover{border-color:var(--blue);color:var(--blue)}
+.da-danger{background:var(--white);color:var(--red);border:1.5px solid var(--ink-05)}
+.da-danger:hover{border-color:var(--red)}
+
+/* ═══ STAT CARDS ═══ */
+.stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:1.5rem}
+.stat-card{background:var(--white);border-radius:var(--radius-lg);padding:1.25rem 1.5rem;
+  box-shadow:var(--shadow-1);border:1px solid var(--ink-05);position:relative;overflow:hidden;transition:.25s var(--ease)}
+.stat-card:hover{box-shadow:var(--shadow-2);transform:translateY(-2px)}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.stat-card.blue::before{background:linear-gradient(90deg,var(--blue),#818cf8)}
+.stat-card.green::before{background:linear-gradient(90deg,var(--green),#34d399)}
+.stat-card.orange::before{background:linear-gradient(90deg,var(--orange),var(--amber))}
+.stat-card.violet::before{background:linear-gradient(90deg,var(--violet),#c084fc)}
+.sc-label{font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-40);margin-bottom:.25rem}
+.sc-value{font-family:'Fraunces',serif;font-weight:900;font-size:2rem;color:var(--ink);line-height:1.1}
+.sc-sub{font-size:.78rem;color:var(--ink-20);margin-top:.15rem}
+
+/* ═══ DETAIL SECTIONS ═══ */
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem}
+@media(max-width:700px){.detail-grid{grid-template-columns:1fr}}
+.detail-card{background:var(--white);border-radius:var(--radius-lg);padding:1.25rem;
+  box-shadow:var(--shadow-1);border:1px solid var(--ink-05)}
+.dc-title{font-family:'Fraunces',serif;font-weight:800;font-size:1rem;color:var(--ink);margin-bottom:.75rem;
+  display:flex;align-items:center;gap:.4rem}
+.dc-row{display:flex;justify-content:space-between;align-items:center;padding:.45rem 0;
+  border-bottom:1px solid var(--ink-02);font-size:.85rem}
+.dc-row:last-child{border-bottom:none}
+.dc-label{color:var(--ink-40)}
+.dc-val{font-weight:700;color:var(--ink)}
+.dc-bar{flex:1;max-width:100px;height:6px;background:var(--ink-05);border-radius:3px;margin:0 .75rem;overflow:hidden}
+.dc-bar-fill{height:100%;border-radius:3px;transition:width .6s var(--ease)}
+.bar-blue{background:var(--blue)}
+.bar-green{background:var(--green)}
+.bar-orange{background:var(--orange)}
+.bar-red{background:var(--red)}
+.bar-violet{background:var(--violet)}
+.bar-amber{background:var(--amber)}
+
+/* ═══ DATA TABLE ═══ */
+.table-section{background:var(--white);border-radius:var(--radius-lg);box-shadow:var(--shadow-1);
+  border:1px solid var(--ink-05);overflow:hidden;margin-bottom:1.5rem}
+.ts-header{display:flex;justify-content:space-between;align-items:center;padding:1rem 1.25rem;
+  border-bottom:1px solid var(--ink-05);flex-wrap:wrap;gap:.5rem}
+.ts-title{font-family:'Fraunces',serif;font-weight:800;font-size:1rem;color:var(--ink);display:flex;align-items:center;gap:.4rem}
+.ts-controls{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+.ts-search{padding:.4rem .7rem;border:1.5px solid var(--ink-05);border-radius:var(--radius);
+  font-family:'Outfit';font-size:.82rem;outline:none;transition:.2s var(--ease);width:180px}
+.ts-search:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.ts-select{padding:.4rem .5rem;border:1.5px solid var(--ink-05);border-radius:var(--radius);
+  font-family:'Outfit';font-size:.82rem;outline:none;background:var(--white);cursor:pointer}
+.table-wrap{overflow-x:auto;max-height:500px;overflow-y:auto}
+.table-wrap::-webkit-scrollbar{height:6px;width:6px}
+.table-wrap::-webkit-scrollbar-thumb{background:var(--ink-10);border-radius:3px}
+table{width:100%;border-collapse:collapse;font-size:.8rem}
+thead{position:sticky;top:0;z-index:2}
+thead th{background:var(--ink);color:#fff;padding:.6rem .5rem;font-weight:600;white-space:nowrap;
+  text-align:left;cursor:pointer;user-select:none;transition:.2s var(--ease)}
+thead th:hover{background:var(--ink-80)}
+thead th.sorted-asc::after{content:' ▲';font-size:.6rem}
+thead th.sorted-desc::after{content:' ▼';font-size:.6rem}
+tbody td{padding:.45rem .5rem;border-bottom:1px solid var(--ink-02);white-space:nowrap}
+tbody tr:hover{background:var(--blue-xl)}
+tbody tr:nth-child(even){background:var(--ink-02)}
+tbody tr:nth-child(even):hover{background:var(--blue-xl)}
+.tag{display:inline-block;padding:.1rem .45rem;border-radius:50px;font-size:.7rem;font-weight:700}
+.tag-oui{background:var(--green-l);color:var(--green)}
+.tag-non{background:var(--red-l);color:var(--red)}
+.empty-state{text-align:center;padding:2rem;color:var(--ink-20)}
+
+/* ═══ TABS ═══ */
+.tab-bar{display:flex;gap:0;border-bottom:2px solid var(--ink-05);margin-bottom:0}
+.tab-btn{padding:.65rem 1.25rem;font-family:'Outfit';font-weight:600;font-size:.85rem;
+  color:var(--ink-40);background:none;border:none;cursor:pointer;position:relative;transition:.2s var(--ease)}
+.tab-btn:hover{color:var(--ink)}
+.tab-btn.active{color:var(--blue)}
+.tab-btn.active::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:2px;background:var(--blue)}
+.tab-count{background:var(--ink-05);color:var(--ink-40);padding:.1rem .4rem;border-radius:50px;font-size:.7rem;margin-left:.3rem}
+.tab-btn.active .tab-count{background:var(--blue-l);color:var(--blue)}
+
+/* ═══ TOAST ═══ */
+.toast{position:fixed;bottom:2rem;right:2rem;background:var(--ink);color:#fff;padding:.85rem 1.25rem;
+  border-radius:var(--radius);box-shadow:var(--shadow-3);font-weight:500;font-size:.88rem;
+  transform:translateY(100px);opacity:0;transition:.35s var(--ease);z-index:999;display:flex;align-items:center;gap:.5rem}
+.toast.show{transform:translateY(0);opacity:1}
+
+/* ═══ RESPONSIVE ═══ */
+@media(max-width:600px){
+  .stat-row{grid-template-columns:1fr 1fr}
+  .phases{flex-wrap:wrap}
+  .phase{min-width:33%}
+  .fl-grid{grid-template-columns:1fr}
+  .dash-actions{flex-direction:column}
+  .da-btn{width:100%;justify-content:center}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <h1>Compilateur <span>Élections Pro 2026</span></h1>
+    <p class="header-sub">Glissez vos fichiers Excel, obtenez un fichier compilé avec tableau de bord en quelques secondes.</p>
+    <div class="header-badges">
+      <span class="hbadge">CST</span><span class="hbadge">CAP A / B / C</span><span class="hbadge">CCP</span>
+      <span class="hbadge">100% navigateur — aucune installation</span>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <!-- PHASES -->
+  <div class="phases">
+    <div class="phase active" id="ph1"><div class="pnum">1</div><div class="plabel">Import</div></div>
+    <div class="phase" id="ph2"><div class="pnum">2</div><div class="plabel">Compilation</div></div>
+    <div class="phase" id="ph3"><div class="pnum">3</div><div class="plabel">Tableau de bord</div></div>
+    <div class="phase" id="ph4"><div class="pnum">4</div><div class="plabel">Export</div></div>
+  </div>
+
+  <!-- DROP ZONE -->
+  <div class="drop-zone" id="dropZone">
+    <div class="dz-icon">📂</div>
+    <div class="dz-title">Glissez vos fichiers Excel ici</div>
+    <div class="dz-sub">ou cliquez pour sélectionner — <b>.xlsx uniquement</b></div>
+    <button class="dz-btn" onclick="document.getElementById('fileInput').click()">📎 Parcourir les fichiers</button>
+    <input type="file" id="fileInput" accept=".xlsx" multiple>
+  </div>
+
+  <!-- PROCESSING -->
+  <div class="processing" id="processing">
+    <div class="proc-spinner"></div>
+    <div class="proc-text" id="procText">Compilation en cours…</div>
+    <div class="proc-detail" id="procDetail">0 / 0 fichiers traités</div>
+    <div class="proc-bar-bg"><div class="proc-bar" id="procBar"></div></div>
+  </div>
+
+  <!-- FILE LIST -->
+  <div class="file-list" id="fileList">
+    <div class="fl-header">
+      <span class="fl-title">Fichiers traités</span>
+      <span class="fl-count" id="flCount">0 fichiers</span>
+    </div>
+    <div class="fl-grid" id="flGrid"></div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="dashboard" id="dashboard">
+    <div class="dash-actions">
+      <button class="da-btn da-primary" onclick="exportXLSX()">📥 Exporter le fichier compilé (.xlsx)</button>
+      <button class="da-btn da-secondary" onclick="resetAll()">↺ Nouvelle compilation</button>
+    </div>
+
+    <!-- STATS -->
+    <div class="stat-row" id="statRow"></div>
+
+    <!-- DETAILS -->
+    <div class="detail-grid" id="detailGrid"></div>
+
+    <!-- DATA TABLES -->
+    <div class="table-section">
+      <div class="tab-bar" id="tabBar">
+        <button class="tab-btn active" onclick="switchTab('fonc')">🏛️ Fonctionnaires <span class="tab-count" id="tabCountF">0</span></button>
+        <button class="tab-btn" onclick="switchTab('cont')">📋 Contractuels <span class="tab-count" id="tabCountC">0</span></button>
+      </div>
+      <div class="ts-header">
+        <div class="ts-title" id="tsTitle">🏛️ Fonctionnaires</div>
+        <div class="ts-controls">
+          <input class="ts-search" id="tsSearch" placeholder="🔍 Rechercher…" oninput="renderTable()">
+          <select class="ts-select" id="tsFilterSource" onchange="renderTable()"><option value="">Toutes les sources</option></select>
+          <select class="ts-select" id="tsFilterScrutin" onchange="renderTable()"><option value="">Tous les scrutins</option></select>
+        </div>
+      </div>
+      <div class="table-wrap" id="tableWrap"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════
+// STATE
+// ══════════════════════════════════════
+let fonctionnaires = [];
+let contractuels = [];
+let fileResults = [];
+let currentTab = 'fonc';
+let sortCol = -1, sortDir = 1;
+
+// ══════════════════════════════════════
+// DRAG & DROP + FILE INPUT
+// ══════════════════════════════════════
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+
+['dragenter','dragover'].forEach(e => dropZone.addEventListener(e, ev => { ev.preventDefault(); dropZone.classList.add('dragover'); }));
+['dragleave','drop'].forEach(e => dropZone.addEventListener(e, ev => { ev.preventDefault(); dropZone.classList.remove('dragover'); }));
+dropZone.addEventListener('click', e => { if(e.target.tagName !== 'BUTTON') fileInput.click(); });
+dropZone.addEventListener('drop', e => handleFiles(e.dataTransfer.files));
+fileInput.addEventListener('change', e => handleFiles(e.target.files));
+
+async function handleFiles(fileListObj) {
+  const files = Array.from(fileListObj).filter(f => f.name.toLowerCase().endsWith('.xlsx') && !f.name.startsWith('~$'));
+  if (!files.length) { showToast('⚠️ Aucun fichier .xlsx trouvé'); return; }
+  
+  // Reset
+  fonctionnaires = []; contractuels = []; fileResults = [];
+  sortCol = -1; sortDir = 1;
+  
+  setPhase(2);
+  document.getElementById('processing').classList.add('visible');
+  dropZone.style.display = 'none';
+  
+  const total = files.length;
+  for (let i = 0; i < total; i++) {
+    document.getElementById('procText').textContent = `Compilation en cours…`;
+    document.getElementById('procDetail').textContent = `${i+1} / ${total} — ${files[i].name}`;
+    document.getElementById('procBar').style.width = `${((i+1)/total)*100}%`;
+    
+    await processFile(files[i]);
+    // Small delay for UI breathing
+    if (i % 10 === 0) await new Promise(r => setTimeout(r, 0));
+  }
+  
+  document.getElementById('processing').classList.remove('visible');
+  document.getElementById('fileList').classList.add('visible');
+  renderFileList();
+  
+  setPhase(3);
+  buildDashboard();
+  document.getElementById('dashboard').classList.add('visible');
+  showToast(`✅ ${total} fichiers compilés — ${fonctionnaires.length + contractuels.length} agents trouvés`);
+}
+
+function processFile(file) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const data = new Uint8Array(e.target.result);
+        const wb = XLSX.read(data, { type: 'array', cellDates: true });
+        
+        const hasF1 = wb.SheetNames.includes('Feuillet 1 FONCTIONNAIRES STAGI');
+        const hasF2 = wb.SheetNames.includes('Feuillet 2 CONTRACTUELS');
+        
+        if (!hasF1 && !hasF2) {
+          fileResults.push({ name: file.name, status: 'skip', fonc: 0, cont: 0 });
+          resolve(); return;
+        }
+        
+        let cf = 0, cc = 0;
+        
+        if (hasF1) {
+          const ws = wb.Sheets['Feuillet 1 FONCTIONNAIRES STAGI'];
+          const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+          for (let r = 1; r < rows.length; r++) {
+            const row = rows[r];
+            const nom = String(row[5] || '').trim();
+            const prenom = String(row[7] || '').trim();
+            const coll = String(row[9] || '').trim();
+            if (!nom && !prenom && !coll) continue;
+            fonctionnaires.push({
+              source: file.name, cst: fmt(row[0]), cap_a: fmt(row[1]), cap_b: fmt(row[2]), cap_c: fmt(row[3]),
+              titre: fmt(row[4]), nom: nom.toUpperCase(), nom_usage: fmt(row[6]), prenom: prenom,
+              dob: fmtDate(row[8]), collectivite: coll, categorie: fmt(row[10]),
+              qualite: fmt(row[11]), adresse: fmt(row[12]), complement: fmt(row[14]),
+              commune: fmt(row[15]).toUpperCase(), cp: fmt(row[16])
+            });
+            cf++;
+          }
+        }
+        
+        if (hasF2) {
+          const ws = wb.Sheets['Feuillet 2 CONTRACTUELS'];
+          const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+          for (let r = 1; r < rows.length; r++) {
+            const row = rows[r];
+            const nom = String(row[3] || '').trim();
+            const prenom = String(row[5] || '').trim();
+            const coll = String(row[7] || '').trim();
+            if (!nom && !prenom && !coll) continue;
+            contractuels.push({
+              source: file.name, cst: fmt(row[0]), ccp: fmt(row[1]),
+              titre: fmt(row[2]), nom: nom.toUpperCase(), nom_usage: fmt(row[4]), prenom: prenom,
+              dob: fmtDate(row[6]), collectivite: coll, type_contrat: fmt(row[8]),
+              qualification: fmt(row[9]), date_debut: fmtDate(row[10]), date_fin: fmtDate(row[11]),
+              adresse: fmt(row[12]), complement: fmt(row[14]),
+              commune: fmt(row[15]).toUpperCase(), cp: fmt(row[16])
+            });
+            cc++;
+          }
+        }
+        
+        fileResults.push({ name: file.name, status: 'ok', fonc: cf, cont: cc });
+      } catch(err) {
+        fileResults.push({ name: file.name, status: 'err', fonc: 0, cont: 0 });
+      }
+      resolve();
+    };
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+function fmt(v) { if (v === null || v === undefined) return ''; return String(v).trim(); }
+function fmtDate(v) {
+  if (!v) return '';
+  if (v instanceof Date) { const d=v.getDate(),m=v.getMonth()+1,y=v.getFullYear(); return `${d<10?'0'+d:d}/${m<10?'0'+m:m}/${y}`; }
+  return String(v).trim();
+}
+
+// ══════════════════════════════════════
+// PHASES
+// ══════════════════════════════════════
+function setPhase(n) {
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById('ph'+i);
+    el.classList.remove('active','done');
+    if (i < n) el.classList.add('done');
+    if (i === n) el.classList.add('active');
+  }
+}
+
+// ══════════════════════════════════════
+// FILE LIST
+// ══════════════════════════════════════
+function renderFileList() {
+  const ok = fileResults.filter(f=>f.status==='ok').length;
+  const err = fileResults.filter(f=>f.status==='err').length;
+  const skip = fileResults.filter(f=>f.status==='skip').length;
+  document.getElementById('flCount').textContent = `${ok} ✅  ${err?err+' ❌  ':''}${skip?skip+' ⏭️':''}`;
+  
+  document.getElementById('flGrid').innerHTML = fileResults.map(f => {
+    const cls = f.status === 'ok' ? 'fi-ok' : f.status === 'err' ? 'fi-err' : 'fi-skip';
+    const label = f.status === 'ok' ? `${f.fonc}F + ${f.cont}C` : f.status === 'err' ? 'Erreur' : 'Ignoré';
+    return `<div class="fl-item"><span class="fi-icon">📄</span><span class="fi-name" title="${f.name}">${f.name}</span><span class="fi-status ${cls}">${label}</span></div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════
+// DASHBOARD
+// ══════════════════════════════════════
+function buildDashboard() {
+  const totalF = fonctionnaires.length;
+  const totalC = contractuels.length;
+  const totalAll = totalF + totalC;
+  const sources = new Set([...fonctionnaires.map(f=>f.source), ...contractuels.map(c=>c.source)]);
+  
+  // Stat cards
+  document.getElementById('statRow').innerHTML = `
+    <div class="stat-card blue"><div class="sc-label">Total agents</div><div class="sc-value">${totalAll}</div><div class="sc-sub">${sources.size} sources</div></div>
+    <div class="stat-card green"><div class="sc-label">Fonctionnaires</div><div class="sc-value">${totalF}</div><div class="sc-sub">Titulaires & stagiaires</div></div>
+    <div class="stat-card orange"><div class="sc-label">Contractuels</div><div class="sc-value">${totalC}</div><div class="sc-sub">CDD & CDI</div></div>
+    <div class="stat-card violet"><div class="sc-label">Fichiers traités</div><div class="sc-value">${fileResults.length}</div><div class="sc-sub">${fileResults.filter(f=>f.status!=='ok').length} erreur(s)/ignoré(s)</div></div>
+  `;
+  
+  // Detail cards
+  const cstF = fonctionnaires.filter(f=>f.cst.toLowerCase()==='oui').length;
+  const cstC = contractuels.filter(c=>c.cst.toLowerCase()==='oui').length;
+  const capA = fonctionnaires.filter(f=>f.cap_a.toLowerCase()==='oui').length;
+  const capB = fonctionnaires.filter(f=>f.cap_b.toLowerCase()==='oui').length;
+  const capC = fonctionnaires.filter(f=>f.cap_c.toLowerCase()==='oui').length;
+  const ccp = contractuels.filter(c=>c.ccp.toLowerCase()==='oui').length;
+  
+  const catA = fonctionnaires.filter(f=>f.categorie.toUpperCase().includes('A')).length;
+  const catB = fonctionnaires.filter(f=>f.categorie.toUpperCase().includes('B')).length;
+  const catC_count = fonctionnaires.filter(f=>f.categorie.toUpperCase().includes('C')).length;
+  
+  const cdd = contractuels.filter(c=>c.type_contrat.toUpperCase()==='CDD').length;
+  const cdi = contractuels.filter(c=>c.type_contrat.toUpperCase()==='CDI').length;
+  const tit = contractuels.filter(c=>c.type_contrat.toLowerCase().includes('titulaire')).length;
+  
+  const maxScrutin = Math.max(cstF+cstC, capA, capB, capC, ccp, 1);
+  const maxCat = Math.max(catA, catB, catC_count, 1);
+  const maxCont = Math.max(cdd, cdi, tit, 1);
+  
+  function bar(val, max, cls) { return `<div class="dc-bar"><div class="dc-bar-fill ${cls}" style="width:${(val/max)*100}%"></div></div>`; }
+  
+  document.getElementById('detailGrid').innerHTML = `
+    <div class="detail-card">
+      <div class="dc-title">📊 Scrutins</div>
+      <div class="dc-row"><span class="dc-label">CST</span>${bar(cstF+cstC,maxScrutin,'bar-blue')}<span class="dc-val">${cstF+cstC}</span></div>
+      <div class="dc-row"><span class="dc-label">CAP A</span>${bar(capA,maxScrutin,'bar-violet')}<span class="dc-val">${capA}</span></div>
+      <div class="dc-row"><span class="dc-label">CAP B</span>${bar(capB,maxScrutin,'bar-orange')}<span class="dc-val">${capB}</span></div>
+      <div class="dc-row"><span class="dc-label">CAP C</span>${bar(capC,maxScrutin,'bar-amber')}<span class="dc-val">${capC}</span></div>
+      <div class="dc-row"><span class="dc-label">CCP</span>${bar(ccp,maxScrutin,'bar-green')}<span class="dc-val">${ccp}</span></div>
+    </div>
+    <div class="detail-card">
+      <div class="dc-title">📋 Répartition</div>
+      <div class="dc-row"><span class="dc-label">Catégorie A</span>${bar(catA,maxCat,'bar-blue')}<span class="dc-val">${catA}</span></div>
+      <div class="dc-row"><span class="dc-label">Catégorie B</span>${bar(catB,maxCat,'bar-violet')}<span class="dc-val">${catB}</span></div>
+      <div class="dc-row"><span class="dc-label">Catégorie C</span>${bar(catC_count,maxCat,'bar-orange')}<span class="dc-val">${catC_count}</span></div>
+      <div style="border-top:1px solid var(--ink-05);margin:.5rem 0"></div>
+      <div class="dc-row"><span class="dc-label">CDD</span>${bar(cdd,maxCont,'bar-green')}<span class="dc-val">${cdd}</span></div>
+      <div class="dc-row"><span class="dc-label">CDI</span>${bar(cdi,maxCont,'bar-blue')}<span class="dc-val">${cdi}</span></div>
+      <div class="dc-row"><span class="dc-label">Titulaire</span>${bar(tit,maxCont,'bar-amber')}<span class="dc-val">${tit}</span></div>
+    </div>
+  `;
+  
+  // Tab counts
+  document.getElementById('tabCountF').textContent = totalF;
+  document.getElementById('tabCountC').textContent = totalC;
+  
+  // Source filter
+  const sel = document.getElementById('tsFilterSource');
+  sel.innerHTML = '<option value="">Toutes les sources</option>' + 
+    Array.from(sources).sort().map(s => `<option value="${s}">${s}</option>`).join('');
+  
+  updateScrutinFilter();
+  renderTable();
+}
+
+function updateScrutinFilter() {
+  const sel = document.getElementById('tsFilterScrutin');
+  if (currentTab === 'fonc') {
+    sel.innerHTML = '<option value="">Tous les scrutins</option><option value="cst">CST = Oui</option><option value="cap_a">CAP A = Oui</option><option value="cap_b">CAP B = Oui</option><option value="cap_c">CAP C = Oui</option>';
+  } else {
+    sel.innerHTML = '<option value="">Tous les scrutins</option><option value="cst">CST = Oui</option><option value="ccp">CCP = Oui</option>';
+  }
+}
+
+// ══════════════════════════════════════
+// TABLE RENDERING
+// ══════════════════════════════════════
+function switchTab(tab) {
+  currentTab = tab;
+  sortCol = -1; sortDir = 1;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-btn')[tab==='fonc'?0:1].classList.add('active');
+  document.getElementById('tsTitle').textContent = tab==='fonc' ? '🏛️ Fonctionnaires' : '📋 Contractuels';
+  document.getElementById('tsSearch').value = '';
+  document.getElementById('tsFilterSource').value = '';
+  document.getElementById('tsFilterScrutin').value = '';
+  updateScrutinFilter();
+  renderTable();
+}
+
+function tag(v) {
+  const lv = String(v).toLowerCase();
+  if (lv === 'oui') return '<span class="tag tag-oui">Oui</span>';
+  if (lv === 'non') return '<span class="tag tag-non">Non</span>';
+  return v;
+}
+
+function renderTable() {
+  const search = document.getElementById('tsSearch').value.toLowerCase();
+  const filterSrc = document.getElementById('tsFilterSource').value;
+  const filterScr = document.getElementById('tsFilterScrutin').value;
+  
+  let data, headers, rowFn;
+  
+  if (currentTab === 'fonc') {
+    data = [...fonctionnaires];
+    headers = ['Source','CST','CAP A','CAP B','CAP C','Nom','Prénom','Naissance','Collectivité','Cat.','Qualité','Commune','CP'];
+    rowFn = f => [f.source, f.cst, f.cap_a, f.cap_b, f.cap_c, f.nom, f.prenom, f.dob, f.collectivite, f.categorie, f.qualite, f.commune, f.cp];
+  } else {
+    data = [...contractuels];
+    headers = ['Source','CST','CCP','Nom','Prénom','Naissance','Collectivité','Contrat','Qualif.','Début','Fin','Commune','CP'];
+    rowFn = c => [c.source, c.cst, c.ccp, c.nom, c.prenom, c.dob, c.collectivite, c.type_contrat, c.qualification, c.date_debut, c.date_fin, c.commune, c.cp];
+  }
+  
+  // Filter
+  if (filterSrc) data = data.filter(d => d.source === filterSrc);
+  if (filterScr) data = data.filter(d => String(d[filterScr] || '').toLowerCase() === 'oui');
+  if (search) data = data.filter(d => {
+    const vals = Object.values(d).join(' ').toLowerCase();
+    return vals.includes(search);
+  });
+  
+  // Sort
+  if (sortCol >= 0) {
+    const keys = currentTab === 'fonc' 
+      ? ['source','cst','cap_a','cap_b','cap_c','nom','prenom','dob','collectivite','categorie','qualite','commune','cp']
+      : ['source','cst','ccp','nom','prenom','dob','collectivite','type_contrat','qualification','date_debut','date_fin','commune','cp'];
+    const key = keys[sortCol];
+    data.sort((a,b) => {
+      const va = String(a[key]||'').toLowerCase(), vb = String(b[key]||'').toLowerCase();
+      return va < vb ? -sortDir : va > vb ? sortDir : 0;
+    });
+  }
+  
+  const wrap = document.getElementById('tableWrap');
+  if (!data.length) {
+    wrap.innerHTML = '<div class="empty-state">Aucun résultat</div>';
+    return;
+  }
+  
+  let html = '<table><thead><tr>';
+  headers.forEach((h, i) => {
+    const cls = sortCol === i ? (sortDir === 1 ? 'sorted-asc' : 'sorted-desc') : '';
+    html += `<th class="${cls}" onclick="sortTable(${i})">${h}</th>`;
+  });
+  html += '</tr></thead><tbody>';
+  
+  data.forEach(d => {
+    const vals = rowFn(d);
+    html += '<tr>' + vals.map((v, i) => {
+      if ((currentTab==='fonc' && i>=1 && i<=4) || (currentTab==='cont' && i>=1 && i<=2)) return `<td>${tag(v)}</td>`;
+      if (i === (currentTab==='fonc'?5:3)) return `<td><strong>${v}</strong></td>`;
+      return `<td>${v}</td>`;
+    }).join('') + '</tr>';
+  });
+  
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+}
+
+function sortTable(col) {
+  if (sortCol === col) sortDir *= -1;
+  else { sortCol = col; sortDir = 1; }
+  renderTable();
+}
+
+// ══════════════════════════════════════
+// EXPORT
+// ══════════════════════════════════════
+function exportXLSX() {
+  setPhase(4);
+  const wb = XLSX.utils.book_new();
+  
+  // Fonctionnaires
+  const fHeaders = ['Source','CST','CAP A','CAP B','CAP C','Titre','Nom de naissance',"Nom d'usage",'Prénom','Date de naissance','Collectivité / Établissement','Catégorie (A/B/C)','Qualité (Titulaire/Stagiaire)','Adresse',"Complément d'adresse",'Commune','Code Postal'];
+  const fData = fonctionnaires.map(f => [f.source,f.cst,f.cap_a,f.cap_b,f.cap_c,f.titre,f.nom,f.nom_usage,f.prenom,f.dob,f.collectivite,f.categorie,f.qualite,f.adresse,f.complement,f.commune,f.cp]);
+  const ws1 = XLSX.utils.aoa_to_sheet([fHeaders, ...fData]);
+  ws1['!cols'] = fHeaders.map((_,i) => ({ wch: i<5?8:20 }));
+  ws1['!autofilter'] = { ref: `A1:Q${fData.length+1}` };
+  XLSX.utils.book_append_sheet(wb, ws1, 'Fonctionnaires');
+  
+  // Contractuels
+  const cHeaders = ['Source','CST','CCP','Titre','Nom de naissance',"Nom d'usage",'Prénom','Date de naissance','Collectivité / Établissement','Type contrat (CDD/CDI)','Qualification (Privé/Public)','Date début contrat','Date fin contrat','Adresse',"Complément d'adresse",'Commune','Code Postal'];
+  const cData = contractuels.map(c => [c.source,c.cst,c.ccp,c.titre,c.nom,c.nom_usage,c.prenom,c.dob,c.collectivite,c.type_contrat,c.qualification,c.date_debut,c.date_fin,c.adresse,c.complement,c.commune,c.cp]);
+  const ws2 = XLSX.utils.aoa_to_sheet([cHeaders, ...cData]);
+  ws2['!cols'] = cHeaders.map((_,i) => ({ wch: i<3?8:20 }));
+  ws2['!autofilter'] = { ref: `A1:Q${cData.length+1}` };
+  XLSX.utils.book_append_sheet(wb, ws2, 'Contractuels');
+  
+  // Tableau de bord
+  const tbData = [
+    ['TABLEAU DE BORD — Élections Professionnelles 2026'],
+    [],
+    ['SYNTHÈSE','','',''],
+    ['Total Fonctionnaires', fonctionnaires.length, '', ''],
+    ['Total Contractuels', contractuels.length, '', ''],
+    ['Total Agents', fonctionnaires.length + contractuels.length, '', ''],
+    ['Fichiers traités', fileResults.length, '', ''],
+    [],
+    ['SCRUTINS','Fonctionnaires','Contractuels','Total'],
+    ['CST', fonctionnaires.filter(f=>f.cst.toLowerCase()==='oui').length, contractuels.filter(c=>c.cst.toLowerCase()==='oui').length],
+    ['CAP A', fonctionnaires.filter(f=>f.cap_a.toLowerCase()==='oui').length, '—'],
+    ['CAP B', fonctionnaires.filter(f=>f.cap_b.toLowerCase()==='oui').length, '—'],
+    ['CAP C', fonctionnaires.filter(f=>f.cap_c.toLowerCase()==='oui').length, '—'],
+    ['CCP', '—', contractuels.filter(c=>c.ccp.toLowerCase()==='oui').length],
+    [],
+    ['CATÉGORIES','Nombre','',''],
+    ['Catégorie A', fonctionnaires.filter(f=>f.categorie.toUpperCase().includes('A')).length],
+    ['Catégorie B', fonctionnaires.filter(f=>f.categorie.toUpperCase().includes('B')).length],
+    ['Catégorie C', fonctionnaires.filter(f=>f.categorie.toUpperCase().includes('C')).length],
+    [],
+    ['TYPE CONTRAT','Nombre','',''],
+    ['CDD', contractuels.filter(c=>c.type_contrat.toUpperCase()==='CDD').length],
+    ['CDI', contractuels.filter(c=>c.type_contrat.toUpperCase()==='CDI').length],
+  ];
+  // Add totals to scrutins
+  tbData[9].push(tbData[9][1] + tbData[9][2]);
+  
+  const ws3 = XLSX.utils.aoa_to_sheet(tbData);
+  ws3['!cols'] = [{ wch: 30 }, { wch: 16 }, { wch: 16 }, { wch: 12 }];
+  XLSX.utils.book_append_sheet(wb, ws3, 'Tableau de bord');
+  
+  XLSX.writeFile(wb, 'Elections_Pro_2026_COMPILE.xlsx');
+  showToast('📥 Fichier Elections_Pro_2026_COMPILE.xlsx téléchargé !');
+}
+
+// ══════════════════════════════════════
+// RESET
+// ══════════════════════════════════════
+function resetAll() {
+  fonctionnaires = []; contractuels = []; fileResults = [];
+  sortCol = -1; sortDir = 1; currentTab = 'fonc';
+  document.getElementById('dashboard').classList.remove('visible');
+  document.getElementById('fileList').classList.remove('visible');
+  document.getElementById('processing').classList.remove('visible');
+  dropZone.style.display = '';
+  fileInput.value = '';
+  setPhase(1);
+}
+
+// ══════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+</script>
+</body>
+</html>
